@@ -1,4 +1,4 @@
-# Resources
+# [Resources](https://github.com/ArnaudBru/resources)
 
 ## Table of Contents
 - [Tools](#tools)
