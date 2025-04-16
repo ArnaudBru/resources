@@ -1,5 +1,0 @@
-# Ignore the 'git' folder
-git/
-
-# Ignore all .md files in the Exercices folder
-books/An_Introduction_to_Statistical_Learning/Exercices/**/*.md
