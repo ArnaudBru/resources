@@ -3,7 +3,7 @@
 For a feature map with dimensions $n_h \times n_w \times n_c$, the dimensions of the output after a pooling layer are:
 
 $$
-\left\lfloor \frac{n_h - f}{s} \right\rfloor + 1 \;\times\; \left\lfloor \frac{n_w - f}{s} \right\rfloor + 1 \;\times\; n_c
+\left\lfloor \frac{n_h - f}{s} \right\rfloor + 1 \times \left\lfloor \frac{n_w - f}{s} \right\rfloor + 1 \times n_c
 $$
 
 *Pooling Layer Formula*
