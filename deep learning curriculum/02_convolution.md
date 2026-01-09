@@ -52,5 +52,7 @@ CNNs naturally learn a hierarchy of representations due to receptive field growt
 TO-DO: add a link to the relevant section when available
 
 Atrous (dilated) convolution is a convolution where the kernel elements are spaced apart by inserting gaps, controlled by a dilation rate.
+
 It increases the receptive field without increasing the number of parameters or reducing the spatial resolution. This solves the problem of needing more context while keeping feature maps dense, which is important for segmentation. It is often used to replace pooling/striding in late layers to preserve detail.
+
 Atrous convolution is a key component in DeepLab-style models for semantic segmentation.
