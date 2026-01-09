@@ -3,10 +3,11 @@
 For an input feature map with dimensions $n_h \times n_w \times n_c$, using a convolution layer with filter size $f$, padding $p$, stride $s$, and number of filters $n_f$, the output dimensions are:
 
 $$
+\left[n_h, n_w, n_c \right] * \left[f, f, n_c \right] = 
 \left\lfloor \frac{n_h + 2p - f}{s} \right\rfloor + 1
-\quad\times\quad
+\quad,\quad
 \left\lfloor \frac{n_w + 2p - f}{s} \right\rfloor + 1
-\quad\times\quad
+\quad,\quad
 n_f
 $$
 
