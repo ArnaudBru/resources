@@ -4,11 +4,13 @@ For an input feature map with dimensions $n_h \times n_w \times n_c$, using a co
 
 $$
 \left[n_h, n_w, n_c \right] * \left[f, f, n_c \right] = 
+\left[
 \left\lfloor \frac{n_h + 2p - f}{s} \right\rfloor + 1
 \quad,\quad
 \left\lfloor \frac{n_w + 2p - f}{s} \right\rfloor + 1
 \quad,\quad
 n_f
+\right]
 $$
 
 where:
