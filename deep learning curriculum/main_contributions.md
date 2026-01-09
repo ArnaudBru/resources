@@ -6,7 +6,7 @@ This page summarizes the major breakthrough ideas that shaped modern computer vi
 
 ## Contributions
 
-### Backpropagation (1986)
+### 1 (TBD) - Backpropagation (1986)
 
 Backpropagation is the core algorithm used to train neural networks by computing how each parameter contributes to the model’s error. It applies the chain rule to propagate the loss gradient from the output back through each layer, producing gradients for all weights efficiently in a single backward pass.
 
@@ -14,13 +14,27 @@ These gradients are then used by an optimizer (such as SGD or Adam) to update pa
 
 Its main difficulty is unstable gradient flow (vanishing or exploding gradients)
 
-### Convolution, weight sharing (1980 - 1998)
+Notions to master:
+- Stochastic Gradient Descent (SGC)
+- Momentum
+- Adam
+- Learning rate schedules
+- Regularization
+
+### 2 - Convolution, weight sharing (1980 - 1998)
 
 Convolution, weight sharing, and pooling are the core building blocks that made neural networks efficient and effective for images. Convolution applies small filters across the entire image, using the same weights (weight-sharing) everywhere, which enforces locality and translation equivariance while drastically reducing the number of parameters compared to fully connected layers.
 
 This solved the problem of scaling neural networks to high-dimensional images and enabled the learning of hierarchical features, from edges and textures to object parts and full objects.
 
-### Pooling (1990s)
+Notions to master:
+- Convolution math: padding/stride/dilation
+- Aliasing
+- Atrous convolution
+
+aliasing; feature hierarchy intuition
+
+### 3 - Pooling (1990s)
 
 Pooling (or strided downsampling) further reduces spatial resolution, making computation cheaper and adding robustness to small translations or noise.
 
@@ -31,7 +45,7 @@ Together, these ideas allowed deep CNNs to become practical, generalize well, an
 - Overfitting Prevention: reducing the spatial dimension prevent overfitting by providing a form of regularization.
 - Feature Hierarchy: lower layers capture fine details and higher layers capture more abstract and global features.
 
-### Non-linear activation functions (1990s → 2012+)
+### 4 (TBD) - Non-linear activation functions (1990s → 2012+)
 
 Non-linear activation functions are what make neural networks more than stacked linear filters, without them, even very deep networks collapse to a single linear transformation.
 By inserting a non-linearity after each layer, the model can represent complex patterns and decision boundaries
