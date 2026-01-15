@@ -99,7 +99,58 @@ The Bayes error rate is the minimum possible error that can be achieved by any c
 Bayes error rate formula latex: 
 $$\text{Bayes Error Rate} = 1 - E\left( \max_{j} Pr(Y=j|X)\right)$$
 
-## 3 Linear Regression
+## 3 Linear Regression (WIP)
+
+Linear Regression is the basic building block of many regression methods.
+It is a simple yet powerful technique used for modeling the relationship between a dependent variable (response) and one or more independent variables (predictors).
+
+### Simple Linear Regression
+
+The relationship we suspect between the response and the predictor:
+$$Y \approx \beta_0 + \beta_1 X$$
+
+The model we fit to the data:
+$$\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x$$
+Where:
+- $Y$ is the response variable
+- $X$ is the predictor variable
+- $\hat{y}$ is the predicted value of the response variable
+- $\hat{\beta}_0$ is the estimated intercept
+- $\hat{\beta}_1$ is the estimated slope
+
+Least Squares Estimation:
+
+We want to choose the parameters $\hat{\beta}_0$ and $\hat{\beta}_1$ such that the sum of squared differences between the observed values $y_i$ and the predicted values $\hat{y}_i$ is minimized.
+
+$$\hat{\beta}_0, \hat{\beta}_1 = \arg\min_{\beta_0, \beta_1} \sum_{i=1}^{n} (y_i - (\beta_0 + \beta_1 x_i))^2$$
+
+The minimizers are
+$$\hat{\beta}_1 = \frac{Cov(X,Y)}{Var(X)} = \frac{\sum_{i=1}^{n}(x_i -\bar{x})(y_i -\bar{y})}{\sum_{i=1}^{n}(x_i -\bar{x})^{2}}$$
+$$\hat{\beta}_0 = \bar{y} - \hat{\beta}_1 \bar{x}$$
+
+#### Accuracy of the coefficients:
+We typically assume that the errors are independent of $X$
+
+We compute the standard errors of the coefficients using the formula:
+
+$$SE(\hat{\beta}_0)^{2} = \sigma^{2}\left( \frac{1}{n} + \frac{\bar{x}^{2}}{\sum_{i=1}^{n}(x_i -\bar{x})^{2}} \right)$$
+$$SE(\hat{\beta}_1)^{2} = \frac{\sigma^{2}}{\sum_{i=1}^{n}(x_i -\bar{x})^{2}}$$
+
+Where:
+$\sigma^{2} = Var(\epsilon)$ is the standard deviation of the errors
+For these formulas to be strictly valid, we need to assume that the errors $\epsilon_i$ for each observation have common variance $\sigma^{2}$ and are uncorrelated
+
+We do not need to estimate $\sigma$ to compute both $\hat{\beta_1}$ and $\hat{\beta_2}$.
+However, it can be estimated with 
+$$ \hat{\sigma}^{2} = \frac{1}{n-2} \sum_{i=1}^{n} (y_i - \hat{y}_i)^{2}$$
+
+
+The 95% confidence interval for $\hat{\beta}_1$ is given by:
+$$\hat{\beta}_1 \pm 2 \cdot SE(\hat{\beta}_1)$$
+
+Similarly, the 95% confidence interval for $\hat{\beta}_0$ is given by:
+$$\hat{\beta}_0 \pm 2 \cdot SE(\hat{\beta}_0)$$
+
 
 ## 4 Classification
 
