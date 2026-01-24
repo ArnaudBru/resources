@@ -52,3 +52,56 @@ By inserting a non-linearity after each layer, the model can represent complex p
 
 Early activations like sigmoid and tanh enabled the first neural models but often saturated (gradients ≈ 0 when input is largely positive or largely negative) , causing slow training and vanishing gradients. The shift to ReLU-style activations solved much of this by keeping gradients stable over wide ranges and making optimization far faster and more reliable.
 
+### 5 (TBD) Dropout (2012) — practical regularization for large models
+
+### 6 (TBD) Better initialization (2010–2015) — makes deep nets trainable
+
+### 7 (TBD) Batch Normalization (2015) — acceleration + stability + implicit regularization
+
+### 8 (TBD) “Small kernels + depth” design (2014) — simple scalable CNN blueprints
+
+### 9 (TBD) Inception / multi-branch multi-scale processing (2014–2016)
+
+### 10 (TBD) Residual / skip connections (2015) — deep networks without degradation
+
+### 11 (TBD) Fully Convolutional Networks for dense prediction (2015) — segmentation becomes “natural”
+
+### 12 (TBD) U-Net (2015) — the canonical encoder–decoder with skip fusion
+
+### 13 (TBD) Two-stage detection (2014–2017) — region proposals + classification/refinement
+
+### 14 (TBD) One-stage detection (2016–2018) — speed by removing proposals
+
+### 15 (TBD) Feature Pyramid Networks (2017) — multi-scale done “right” for detection/segmentation
+
+### 16 (TBD) Instance segmentation (2017) — detection + per-instance masks
+
+### 17 (TBD) Dilated/Atrous convolutions + ASPP (2016–2018) — context without losing resolution
+
+### 18 (TBD) Attention / Transformer core (2017) — global interactions as a primitive
+
+### 19 (TBD) Vision Transformers (2020–2021) — patch tokens replace conv features
+
+### 20 (TBD) Hierarchical / windowed transformers (2021) — make Transformers work for detection/segmentation
+
+### 21 (TBD) End-to-end detection with set prediction (2020) — no anchors, no NMS
+
+### 22 (TBD) Self-supervised representation learning (2019–2021) — pretrain without labels
+
+### 23 (TBD) Vision–language pretraining (2021) — semantics via text supervision
+
+### 24 (TBD) Diffusion models (2020–2022) — iterative denoising beats GANs for many regimes
+
+## Impactful but less fundamental (still worth knowing)
+
+### A) Squeeze-and-Excitation (2017) — channel attention inside CNNs
+
+### B) Efficient scaling laws + NAS (2018–2019)
+
+### C) Modern augmentation recipes (2017–2021): Mixup, CutMix, RandAugment
+
+### D) Knowledge distillation (2015–2021)
+
+### E) GAN refinements (2015–2020) — still useful ideas even if diffusion dominates
+
+### F) Neural Radiance Fields (2020) — major for 3D, not always core for 2D pipelines
