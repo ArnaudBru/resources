@@ -86,14 +86,14 @@ Until then, Vision models were CNN that would extract feature by progressively b
 
 Vision Transformers replace that with a pure transformer encoder: the image is split into fixed size patches, each patch linearly embedded into a token. A global self-attention is used on the first layer, making global context immediately available
 
+It is often beneficial to fine-tune at higher resolution than pre-training
+
 At first heavy training was necessary, ViTs trade architectural inductive bias for scaling capacity.
 DeiT (Data-efficient Image Transformers) showed that ViT can be trained on smaller datasets, introducing the standard ViT training recipe:
 - Strong augmentation (RandAugment, Mixup, CutMix)
 - AdamW optimizer (decoupled weight decay)
 - Learning-rate warmup + cosine decay
-- Knowledge distillation via a distillation token
-
-
+- [Knowledge distillation](training_techniques\distillation.md) via a distillation token
 
 ### 20 (TBD) Hierarchical / windowed transformers (2021) — make Transformers work for detection/segmentation
 
