@@ -93,7 +93,7 @@ DeiT (Data-efficient Image Transformers) showed that ViT can be trained on small
 - Strong augmentation (RandAugment, Mixup, CutMix)
 - AdamW optimizer (decoupled weight decay)
 - Learning-rate warmup + cosine decay
-- [Knowledge distillation](training_techniques\distillation.md) via a distillation token
+- [Knowledge distillation](training_techniques/distillation.md) via a distillation token
 
 ### 20 (TBD) Hierarchical / windowed transformers (2021) — make Transformers work for detection/segmentation
 
