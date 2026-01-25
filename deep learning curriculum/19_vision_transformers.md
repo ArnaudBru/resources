@@ -5,7 +5,7 @@
 The following equation turns an image into a sequence of position-aware (via $E_{pos}) tokens - one per patch, plus a class token $x_{\text{class}}$
 
 $$
-z_0 = \big[ x_{\text{class}};; x_p^1 E;; x_p^2 E;; \dots;; x_p^N E \big] + E_{\text{pos}}
+z_0 = \big[ x_{\text{class}}; x_p^1 E; x_p^2 E; \dots ; x_p^N E \big] + E_{\text{pos}}
 $$
 
 where:

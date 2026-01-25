@@ -36,7 +36,7 @@ where:
 Assume a model outputs the following logits for 4 classes:
 
 $$
-\mathbf{z} = [3.0,\; 1.5,\; 0.0,\; -1.0]
+\mathbf{z} = [3.0; 1.5; 0.0; -1.0]
 $$
 
 Softmax with temperature $T$ is defined as:
@@ -83,24 +83,19 @@ This enforces correctness on labeled data
 The student loss is a weighted sum of two cross-entropy losses:
 
 $$
-\mathcal{L}
-= \alpha \, T^2 \, \mathcal{L}_{\text{soft}}
-\;+\;
-(1-\alpha)\,\mathcal{L}_{\text{hard}}
+\mathcal{L} = \alpha T^2 \mathcal{L}_{\text{soft}} + (1-\alpha)\,\mathcal{L}_{\text{hard}}
 $$
 
 where the **soft-target (distillation) loss** is:
 
 $$
-\mathcal{L}_{\text{soft}}
-= - \sum_{i=1}^{K} p_i^{(T)} \, \log q_i^{(T)}
+\mathcal{L}_{\text{soft}} = - \sum_{i=1}^{K} p_i^{(T)} \log q_i^{(T)}
 $$
 
 and the **hard-label loss** is:
 
 $$
-\mathcal{L}_{\text{hard}}
-= - \sum_{i=1}^{K} y_i \, \log q_i^{(1)}
+\mathcal{L}_{\text{hard}} = - \sum_{i=1}^{K} y_i \log q_i^{(1)}
 $$
 
 **Definitions**
@@ -114,17 +109,11 @@ $$
 Teacher / student probabilities:
 
 - $p_i^{(T)}$ → teacher soft target probability at temperature $T$:
-  $$
-  p_i^{(T)} = \frac{\exp(v_i/T)}{\sum_{j=1}^{K}\exp(v_j/T)}
-  $$
+  $p_i^{(T)} = \frac{\exp(v_i/T)}{\sum_{j=1}^{K}\exp(v_j/T)}$
 - $q_i^{(T)}$ → student probability at temperature $T$:
-  $$
-  q_i^{(T)} = \frac{\exp(z_i/T)}{\sum_{j=1}^{K}\exp(z_j/T)}
-  $$
+  $q_i^{(T)} = \frac{\exp(z_i/T)}{\sum_{j=1}^{K}\exp(z_j/T)}$
 - $q_i^{(1)}$ → student probability at temperature $1$ (standard softmax used for hard labels):
-  $$
-  q_i^{(1)} = \frac{\exp(z_i)}{\sum_{j=1}^{K}\exp(z_j)}
-  $$
+  $q_i^{(1)} = \frac{\exp(z_i)}{\sum_{j=1}^{K}\exp(z_j)}$
 
 Logits:
 
