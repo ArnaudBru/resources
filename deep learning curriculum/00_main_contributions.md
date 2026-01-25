@@ -80,7 +80,20 @@ Early activations like sigmoid and tanh enabled the first neural models but ofte
 
 ### 18 (TBD) Attention / Transformer core (2017) — global interactions as a primitive
 
-### 19 (TBD) Vision Transformers (2020–2021) — patch tokens replace conv features
+### 19 (WIP) Vision Transformers (2020–2021) — patch tokens replace conv features
+
+Until then, Vision models were CNN that would extract feature by progressively building spatial hierarchies through successive convolutions and pooling (first layer represent local feature, deeper layer represent global features).
+
+Vision Transformers replace that with a pure transformer encoder: the image is split into fixed size patches, each patch linearly embedded into a token. A global self-attention is used on the first layer, making global context immediately available
+
+At first heavy training was necessary, ViTs trade architectural inductive bias for scaling capacity.
+DeiT (Data-efficient Image Transformers) showed that ViT can be trained on smaller datasets, introducing the standard ViT training recipe:
+- Strong augmentation (RandAugment, Mixup, CutMix)
+- AdamW optimizer (decoupled weight decay)
+- Learning-rate warmup + cosine decay
+- Knowledge distillation via a distillation token
+
+
 
 ### 20 (TBD) Hierarchical / windowed transformers (2021) — make Transformers work for detection/segmentation
 
