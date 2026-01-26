@@ -92,7 +92,55 @@
 
 ---
 
-### 8) “Small kernels + depth” design (2014) — simple scalable CNN blueprints
+### 8) Autoencoders (2006–2010) — representation learning without labels
+
+* **Key concepts that enabled it**
+
+  * Encoder–decoder architectures
+  * Bottleneck representations
+  * Reconstruction loss as supervision
+
+* **What problem it solved**
+
+  * Learning meaningful representations without labels
+  * Dimensionality reduction beyond PCA
+
+* **What it enabled**
+
+  * Unsupervised feature learning
+  * Pretraining for deep networks (early deep learning revival)
+  * Encoder–decoder patterns used everywhere later
+
+* **Seminal papers / models**
+
+  * Hinton & Salakhutdinov (2006) — Reducing the Dimensionality of Data with Neural Networks
+  * Sparse / Denoising Autoencoders
+
+### 9) Variational Autoencoders (2013–2014) — probabilistic latent spaces
+
+* **Key concepts that enabled it**
+
+  * Latent variable models
+  * Variational inference
+  * Reparameterization trick
+
+* **What problem it solved**
+
+  * Autoencoders learned representations, but not smooth, generative latent spaces 
+  * Sampling and interpolation were poorly defined
+
+* **What it enabled**
+
+  * Principled generative modeling 
+  * Continuous, structured latent spaces 
+  * The mathematical foundation behind modern diffusion and latent generative models
+
+* **Seminal papers / models**
+
+  * Kingma & Welling (2013) — Auto-Encoding Variational Bayes 
+  * Rezende et al. (2014)
+
+### 10) “Small kernels + depth” design (2014) — simple scalable CNN blueprints
 
 * **Key concepts that enabled it**
 
@@ -110,7 +158,7 @@
 
 ---
 
-### 9) Inception / multi-branch multi-scale processing (2014–2016)
+### 11) Inception / multi-branch multi-scale processing (2014–2016)
 
 * **Key concepts that enabled it**
 
@@ -128,7 +176,7 @@
 
 ---
 
-### 10) Residual / skip connections (2015) — deep networks without degradation
+### 12) Residual / skip connections (2015) — deep networks without degradation
 
 * **Key concepts that enabled it**
 
@@ -146,7 +194,7 @@
 
 ---
 
-### 11) Fully Convolutional Networks for dense prediction (2015) — segmentation becomes “natural”
+### 13) Fully Convolutional Networks for dense prediction (2015) — segmentation becomes “natural”
 
 * **Key concepts that enabled it**
 
@@ -164,7 +212,7 @@
 
 ---
 
-### 12) U-Net (2015) — the canonical encoder–decoder with skip fusion
+### 14) U-Net (2015) — the canonical encoder–decoder with skip fusion
 
 * **Key concepts that enabled it**
 
@@ -182,7 +230,7 @@
 
 ---
 
-### 13) Two-stage detection (2014–2017) — region proposals + classification/refinement
+### 15) Two-stage detection (2014–2017) — region proposals + classification/refinement
 
 * **Key concepts that enabled it**
 
@@ -201,7 +249,7 @@
 
 ---
 
-### 14) One-stage detection (2016–2018) — speed by removing proposals
+### 16) One-stage detection (2016–2018) — speed by removing proposals
 
 * **Key concepts that enabled it**
 
@@ -220,7 +268,7 @@
 
 ---
 
-### 15) Feature Pyramid Networks (2017) — multi-scale done “right” for detection/segmentation
+### 17) Feature Pyramid Networks (2017) — multi-scale done “right” for detection/segmentation
 
 * **Key concepts that enabled it**
 
@@ -237,7 +285,7 @@
 
 ---
 
-### 16) Instance segmentation (2017) — detection + per-instance masks
+### 18) Instance segmentation (2017) — detection + per-instance masks
 
 * **Key concepts that enabled it**
 
@@ -254,7 +302,7 @@
 
 ---
 
-### 17) Dilated/Atrous convolutions + ASPP (2016–2018) — context without losing resolution
+### 19) Dilated/Atrous convolutions + ASPP (2016–2018) — context without losing resolution
 
 * **Key concepts that enabled it**
 
@@ -272,7 +320,7 @@
 
 ---
 
-### 18) Attention / Transformer core (2017) — global interactions as a primitive
+### 20) Attention / Transformer core (2017) — global interactions as a primitive
 
 * **Key concepts that enabled it**
 
@@ -291,7 +339,7 @@
 
 ---
 
-### 19) Vision Transformers (2020–2021) — patch tokens replace conv features
+### 21) Vision Transformers (2020–2021) — patch tokens replace conv features
 
 * **Key concepts that enabled it**
 
@@ -311,7 +359,7 @@
 
 ---
 
-### 20) Hierarchical / windowed transformers (2021) — make Transformers work for detection/segmentation
+### 22) Hierarchical / windowed transformers (2021) — make Transformers work for detection/segmentation
 
 * **Key concepts that enabled it**
 
@@ -329,7 +377,7 @@
 
 ---
 
-### 21) End-to-end detection with set prediction (2020) — no anchors, no NMS
+### 23) End-to-end detection with set prediction (2020) — no anchors, no NMS
 
 * **Key concepts that enabled it**
 
@@ -346,7 +394,7 @@
 
 ---
 
-### 22) Self-supervised representation learning (2019–2021) — pretrain without labels
+### 24) Self-supervised representation learning (2019–2021) — pretrain without labels
 
 * **Key concepts that enabled it**
 
@@ -366,7 +414,7 @@
 
 ---
 
-### 23) Vision–language pretraining (2021) — semantics via text supervision
+### 25) Vision–language pretraining (2021) — semantics via text supervision
 
 * **Key concepts that enabled it**
 
@@ -384,7 +432,7 @@
 
 ---
 
-### 24) Diffusion models (2020–2022) — iterative denoising beats GANs for many regimes
+### 26) Diffusion models (2020–2022) — iterative denoising beats GANs for many regimes
 
 * **Key concepts that enabled it**
 

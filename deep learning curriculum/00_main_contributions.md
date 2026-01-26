@@ -58,29 +58,33 @@ Early activations like sigmoid and tanh enabled the first neural models but ofte
 
 ### 7 (TBD) Batch Normalization (2015) — acceleration + stability + implicit regularization
 
-### 8 (TBD) “Small kernels + depth” design (2014) — simple scalable CNN blueprints
+### 8 (TBD) Autoencoders (2006–2010) — representation learning without labels
 
-### 9 (TBD) Inception / multi-branch multi-scale processing (2014–2016)
+### 9 (TBD) Variational Autoencoders (2013–2014) — probabilistic latent spaces
 
-### 10 (TBD) Residual / skip connections (2015) — deep networks without degradation
+### 10 (TBD) “Small kernels + depth” design (2014) — simple scalable CNN blueprints
 
-### 11 (TBD) Fully Convolutional Networks for dense prediction (2015) — segmentation becomes “natural”
+### 11 (TBD) Inception / multi-branch multi-scale processing (2014–2016)
 
-### 12 (TBD) U-Net (2015) — the canonical encoder–decoder with skip fusion
+### 12 (TBD) Residual / skip connections (2015) — deep networks without degradation
 
-### 13 (TBD) Two-stage detection (2014–2017) — region proposals + classification/refinement
+### 13 (TBD) Fully Convolutional Networks for dense prediction (2015) — segmentation becomes “natural”
 
-### 14 (TBD) One-stage detection (2016–2018) — speed by removing proposals
+### 14 (TBD) U-Net (2015) — the canonical encoder–decoder with skip fusion
 
-### 15 (TBD) Feature Pyramid Networks (2017) — multi-scale done “right” for detection/segmentation
+### 15 (TBD) Two-stage detection (2014–2017) — region proposals + classification/refinement
 
-### 16 (TBD) Instance segmentation (2017) — detection + per-instance masks
+### 16 (TBD) One-stage detection (2016–2018) — speed by removing proposals
 
-### 17 (TBD) Dilated/Atrous convolutions + ASPP (2016–2018) — context without losing resolution
+### 17 (TBD) Feature Pyramid Networks (2017) — multi-scale done “right” for detection/segmentation
 
-### 18 (TBD) Attention / Transformer core (2017) — global interactions as a primitive
+### 18 (TBD) Instance segmentation (2017) — detection + per-instance masks
 
-### 19 (WIP) Vision Transformers (2020–2021) — patch tokens replace conv features
+### 19 (TBD) Dilated/Atrous convolutions + ASPP (2016–2018) — context without losing resolution
+
+### 20 (TBD) Attention / Transformer core (2017) — global interactions as a primitive
+
+### 21 (WIP) Vision Transformers (2020–2021) — patch tokens replace conv features
 
 Until then, Vision models were CNN that would extract feature by progressively building spatial hierarchies through successive convolutions and pooling (first layer represent local feature, deeper layer represent global features).
 
@@ -95,15 +99,15 @@ DeiT (Data-efficient Image Transformers) showed that ViT can be trained on small
 - Learning-rate warmup + cosine decay
 - [Knowledge distillation](training_techniques/distillation.md) via a distillation token
 
-### 20 (TBD) Hierarchical / windowed transformers (2021) — make Transformers work for detection/segmentation
+### 22 (TBD) Hierarchical / windowed transformers (2021) — make Transformers work for detection/segmentation
 
-### 21 (TBD) End-to-end detection with set prediction (2020) — no anchors, no NMS
+### 23 (TBD) End-to-end detection with set prediction (2020) — no anchors, no NMS
 
-### 22 (TBD) Self-supervised representation learning (2019–2021) — pretrain without labels
+### 24 (TBD) Self-supervised representation learning (2019–2021) — pretrain without labels
 
-### 23 (TBD) Vision–language pretraining (2021) — semantics via text supervision
+### 25 (TBD) Vision–language pretraining (2021) — semantics via text supervision
 
-### 24 (TBD) Diffusion models (2020–2022) — iterative denoising beats GANs for many regimes
+### 26 (TBD) Diffusion models (2020–2022) — iterative denoising beats GANs for many regimes
 
 ## Impactful but less fundamental (still worth knowing)
 
