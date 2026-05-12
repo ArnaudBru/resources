@@ -1,2 +1,15 @@
 # Jupyter noteboks checkpoints
 .ipynb_checkpoints
+
+# JetBrains IDE config
+.idea/
+
+# Ruff cache
+.ruff_cache/
+
+# Local stray files (untracked test/scratch material)
+dirUp/
+
+# Large PDFs at repo root (tracked PDFs belong in books/)
+/Introduction_to_Probability.pdf
+/Probability_and_Statistical_Inference.pdf
