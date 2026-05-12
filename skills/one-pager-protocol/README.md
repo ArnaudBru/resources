@@ -7,7 +7,7 @@ A skill that automates building a practical HTML one-pager: ask 5 pre-flight que
 | File | Role |
 |---|---|
 | `SKILL.md` | The skill itself. Copy/symlink into `~/.claude/skills/one-pager-protocol/` to activate. |
-| `practical_one_pager_protocol.html` | Canonical reference — the protocol applied to itself. Read for visual conventions, CSS skeleton, and a worked example of the pre-flight → final-page mapping. |
+| `practical_one_pager_protocol.html` | Canonical reference — the protocol applied to itself. Read for visual conventions, CSS skeleton, and a worked example of the pre-flight → final-page mapping. **[View rendered](https://arnaudbru.github.io/resources/skills/one-pager-protocol/practical_one_pager_protocol.html)**. |
 
 ## Install
 
@@ -37,10 +37,10 @@ The skill walks through 5 pre-flight questions (audience, usage context, the one
 
 ## Applied examples
 
-Real one-pagers built with this skill live at `../ml-training/` in this repo:
+Real one-pagers built with this skill live at [`../ml-training/`](../ml-training/) in this repo:
 
-- `choosing_an_instance.html` — decision-guide for picking the right GPU instance for training (VRAM / sys RAM / compute regime / cost lenses)
-- `choosing_dataset_patterns.html` — decision-guide for picking among PyTorch dataset patterns (in-memory / lazy / pre-decoded / sharded / features / streaming)
+- [`choosing_an_instance.html`](https://arnaudbru.github.io/resources/ml-training/choosing_an_instance.html) — decision-guide for picking the right GPU instance for training (VRAM / sys RAM / compute regime / cost lenses)
+- [`choosing_dataset_patterns.html`](https://arnaudbru.github.io/resources/ml-training/choosing_dataset_patterns.html) — decision-guide for picking among PyTorch dataset patterns (in-memory / lazy / pre-decoded / sharded / features / streaming)
 
 ## How the protocol stays alive
 
