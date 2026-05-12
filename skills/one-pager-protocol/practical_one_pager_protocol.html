@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Practical one-pager protocol</title>
+<style>
+  :root {
+    --ink: #1f2933;
+    --muted: #52606d;
+    --ok: #2f855a;
+    --warn: #b7791f;
+    --bad: #c53030;
+    --rule: #cbd2d9;
+    --paper: #fafbfc;
+    --card: #ffffff;
+    --code-bg: #f1f5f9;
+    --accent: #3182ce;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    color: var(--ink);
+    background: var(--paper);
+    margin: 0 auto;
+    padding: 28px 36px 48px;
+    line-height: 1.5;
+    font-size: 14px;
+    max-width: 1100px;
+  }
+  h1 { font-size: 24px; margin: 0 0 4px 0; letter-spacing: -0.01em; }
+  h2 { font-size: 17px; margin: 18px 0 6px 0; color: var(--ink); display: flex; align-items: baseline; gap: 10px; }
+  h2 .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+    background: var(--accent);
+  }
+  h3 { font-size: 11.5px; margin: 10px 0 4px 0; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+  p { margin: 4px 0; }
+  .subtitle { color: var(--muted); margin: 0 0 18px 0; font-size: 13.5px; }
+  code {
+    font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    background: var(--code-bg);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 0.92em;
+  }
+  /* TL;DR */
+  .tldr {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--ink);
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin-bottom: 18px;
+  }
+  .tldr h3 { margin-top: 0; color: var(--ink); }
+  .tldr ul { margin: 6px 0 2px 18px; padding: 0; }
+  .tldr li { margin: 4px 0; }
+  /* Section card */
+  .section {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 14px 18px 16px;
+    margin-bottom: 18px;
+  }
+  .section > p:first-of-type { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  /* Tables */
+  table { border-collapse: collapse; width: 100%; margin: 6px 0 2px; font-size: 12.8px; }
+  th, td { border-bottom: 1px solid var(--rule); padding: 5px 8px; text-align: left; vertical-align: top; }
+  th { color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; font-size: 10.5px; }
+  td.tag {
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--ink);
+    font-size: 12.5px;
+  }
+  td.muted { color: var(--muted); font-size: 12.5px; }
+  /* Lists */
+  ul { margin: 4px 0 4px 18px; padding: 0; }
+  li { margin: 4px 0; }
+  /* Pills */
+  .pill {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    background: #e2e8f0;
+    color: var(--ink);
+  }
+  .pill.req { background: #c6f6d5; color: var(--ok); }
+  .pill.opt { background: #e2e8f0; color: var(--muted); }
+  /* Example sidebar */
+  .example {
+    background: #f8fafc;
+    border: 1px dashed var(--rule);
+    border-radius: 6px;
+    padding: 14px 18px 16px;
+    margin-top: 18px;
+  }
+  .example h2 { margin-top: 0; }
+  .example .ex-label {
+    display: inline-block;
+    background: var(--ink);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 3px;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+  /* Cut box */
+  .cut {
+    background: #fff5f5;
+    border: 1px solid #fbb6b6;
+    border-left: 4px solid var(--bad);
+    border-radius: 6px;
+    padding: 12px 16px 14px;
+    margin-top: 18px;
+  }
+  .cut h2 { margin-top: 0; display: block; }
+  .cut h2 .num { display: none; }
+  .cut ul { margin: 4px 0 0 18px; }
+  /* Footer */
+  .footer {
+    margin-top: 22px;
+    color: var(--muted);
+    font-size: 11.5px;
+    text-align: right;
+  }
+</style>
+</head>
+<body>
+
+<h1>The practical one-pager protocol</h1>
+<p class="subtitle">How to write a 1–2 page reference that's worth coming back to. Five pre-flight questions, structural conventions, and the rules that emerged from building two pagers iteratively.</p>
+
+<div class="tldr">
+  <h3>TL;DR</h3>
+  <ul>
+    <li><strong>Ask 5 pre-flight questions before opening an editor.</strong> Wrong answers on audience, shape, or specificity force a full rewrite — cheap to ask, expensive to skip.</li>
+    <li><strong>Title the page by the question it answers</strong>, not the underlying concept. <em>"How to choose an instance"</em> ages better than <em>"Memory estimation"</em>.</li>
+    <li><strong>Each idea appears once.</strong> Tables for scan, prose for stories, lists for enumerations. Pair formula tables with concrete-reference tables; pair frameworks with worked examples.</li>
+    <li><strong>Variable names match across TL;DR, tables, and examples.</strong> No <code>N</code> / <code>B</code> / <code>pf</code> without a legend.</li>
+    <li><strong>Self-contained HTML, inline CSS, no JS, no CDN.</strong> Works offline. Lives in <code>~/Desktop/plans/html/</code>.</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h2><span class="num">1</span>Pre-flight questions — ask these before writing anything</h2>
+  <p>Five questions, in this order. Each answer eliminates a design space. Skip them and you'll write a page that the audience can't use.</p>
+
+  <table>
+    <tr><th style="width: 18%;">Question</th><th>What it shapes</th><th>Common answers and what they imply</th></tr>
+    <tr>
+      <td class="tag">1. Audience</td>
+      <td class="muted">Density, jargon level, explanation depth.</td>
+      <td>
+        <strong>Me only</strong> → max density, no apologies. <strong>Team</strong> → onboarding-quality, define vocabulary inline. <strong>Mixed (me + team + hires)</strong> → default; density preserved, explanations terse but present. <strong>External</strong> → lighter on jargon, more framing.
+      </td>
+    </tr>
+    <tr>
+      <td class="tag">2. Usage context</td>
+      <td class="muted">Length budget, layout style.</td>
+      <td>
+        <strong>On-screen during debugging</strong> → scrollable rich layout, Cmd-F-friendly. <strong>Printed / wall</strong> → one page; ruthless cut. <strong>Linked from tickets</strong> → deep-linkable sections; bookmark-friendly. <strong>Onboarding</strong> → longer OK; first-read flow matters.
+      </td>
+    </tr>
+    <tr>
+      <td class="tag">3. The question this page answers <em>in one sentence</em></td>
+      <td class="muted">The title. The structure. What gets cut.</td>
+      <td>
+        Write the title as the question, not the concept. <em>"How do I choose the right instance?"</em> rather than <em>"Memory estimation"</em>. If you can't write it in one sentence, you don't yet know what the page is for.
+      </td>
+    </tr>
+    <tr>
+      <td class="tag">4. Specificity</td>
+      <td class="muted">How project-coupled the body is.</td>
+      <td>
+        <strong>Generic</strong> → reusable; project references break tone. <strong>Generic + example</strong> (default) → page reads as concepts with a labelled "Example" sidebar grounding it. <strong>Project-coupled</strong> → the project IS the value-add (rare; usually a sign you wanted a project doc, not a one-pager).
+      </td>
+    </tr>
+    <tr>
+      <td class="tag">5. Shape</td>
+      <td class="muted">Top-of-page structure.</td>
+      <td>
+        <strong>Decision-guide</strong> → framework / decision tree at top, sequential sections, "pick which" logic. <strong>Reference</strong> → comparison tables dominate, no decision tree needed. <strong>Analysis &amp; recommendation</strong> → TL;DR-heavy, findings before prescriptions, side notes for orthogonal levers.
+      </td>
+    </tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2><span class="num">2</span>Structural conventions — section order, top to bottom</h2>
+  <p>Every page is some subset of these blocks, in this order. Skip optional ones if they don't earn their space.</p>
+
+  <table>
+    <tr><th>Block</th><th>Status</th><th>Purpose</th></tr>
+    <tr><td class="tag">Title + 1-line subtitle</td><td><span class="pill req">required</span></td><td>The subtitle answers <em>what question this page answers</em>. The title is the question.</td></tr>
+    <tr><td class="tag">TL;DR box</td><td><span class="pill req">analyses</span> / <span class="pill opt">references</span></td><td>3–5 bullets max. Includes the dominant formula's full variable names. Readers screenshot this.</td></tr>
+    <tr><td class="tag">Framework / decision tree</td><td><span class="pill req">decision-guides</span></td><td>Numbered lenses or steps applied in order. Eliminates "pick by cost first" mistakes.</td></tr>
+    <tr><td class="tag">Reference tables</td><td><span class="pill req">required</span></td><td>The core scan layer. Formulas with intuition cells. Concrete priors at recognisable workloads.</td></tr>
+    <tr><td class="tag">Worked example (boxed)</td><td><span class="pill req">required</span></td><td>One named example. Dashed-border box, "EXAMPLE" label. Clearly skippable for readers who only want the framework.</td></tr>
+    <tr><td class="tag">Pitfalls / gotchas</td><td><span class="pill req">required</span></td><td>Specific failure modes + how to recognise + how to fix. Amber-tinted box.</td></tr>
+    <tr><td class="tag">References / further reading</td><td><span class="pill opt">optional</span></td><td>Links to deeper material. Keep tight; not a dumping ground.</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2><span class="num">3</span>Density and content rules</h2>
+
+  <h3>Each idea in exactly one place</h3>
+  <ul>
+    <li>If the same component is in a formula table and a separate prose "what this is" section, you have two copies. Cut the prose; add a <strong>"What it is"</strong> cell to the formula table instead. One row per idea, formula + intuition side-by-side.</li>
+    <li>Exception: an idea that genuinely needs two reading modes (table for scan, paragraph for first-time learners) can be in both — but mark which is which.</li>
+  </ul>
+
+  <h3>Pick the right structure per content type</h3>
+  <ul>
+    <li><strong>Tables</strong> when content is parallel (4+ rows of the same shape). Comparisons, formulas, configs.</li>
+    <li><strong>Prose</strong> when there's causality or a story ("this happened because…").</li>
+    <li><strong>Bulleted lists</strong> for enumerations that aren't structured enough for a table.</li>
+  </ul>
+
+  <h3>Variable naming</h3>
+  <ul>
+    <li>Use the same names in formulas as in the TL;DR, never abbreviate. <code>batch_size</code>, not <code>B</code>. <code>num_workers × prefetch_factor</code>, not <code>w × pf</code>.</li>
+    <li>The asymmetry: you wrote the abbreviations, so they feel obvious. The first-time reader hasn't lived in your head. They pay a translation cost on every formula.</li>
+  </ul>
+
+  <h3>Hedge consistently</h3>
+  <ul>
+    <li>If one scaling claim is hedged ("linear until vCPU saturates"), hedge all of them. Mixed precision signals "the writer didn't notice."</li>
+    <li>"Proportional speedup" and "linear speedup" describe the same math. Pick one term, use it everywhere.</li>
+  </ul>
+
+  <h3>Pair formulas with concrete numbers</h3>
+  <ul>
+    <li>Formula tables tell you the dimensions; ballpark tables tell you the magnitude. Readers need both: <em>"VRAM ∝ batch × activations"</em> and <em>"ResNet-50 at bs=64 ≈ 6 GB"</em>.</li>
+    <li>Call out non-obvious modality shifts where the dominant term changes (activations dominate vision; weights dominate LLMs).</li>
+  </ul>
+
+  <h3>Replace metaphors with measurements</h3>
+  <ul>
+    <li>"The smoking gun" → <em>"CPU 680 % / GPU ~0 %"</em>. Readers trust numbers more than phrases.</li>
+    <li>If you can quote a measurement, do. Reserve metaphor for cases where no measurement exists.</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h2><span class="num">4</span>Visual and tech baseline</h2>
+
+  <h3>Tech</h3>
+  <ul>
+    <li>One <code>.html</code> file, inline <code>&lt;style&gt;</code>, no external CDN or build step. Works offline.</li>
+    <li>Markdown-readable structure where reasonable (headings, paragraphs, lists). Hand-crafted HTML only where the visual layout pays for itself (tables, callout boxes, decision-tree numbering).</li>
+    <li>Save at <code>~/Desktop/plans/html/&lt;slug&gt;.html</code>.</li>
+  </ul>
+
+  <h3>Layout</h3>
+  <ul>
+    <li><strong>Two-column ONLY when content is genuinely parallel</strong> (VRAM ∥ sys RAM are two independent capacities; framework steps are not parallel — they're sequential).</li>
+    <li>Default to single-column flow. Two-column is a feature, not a default.</li>
+    <li>Numbered section circles for sequential frameworks (lenses, steps).</li>
+  </ul>
+
+  <h3>Colour palette (the v2 reference set)</h3>
+  <ul>
+    <li><strong>Ink</strong> (text) / <strong>muted</strong> (subtitles, intuition cells) / <strong>paper</strong> (background)</li>
+    <li><strong>Ok / warn / bad</strong> for pills and status — sparingly</li>
+    <li><strong>Section accents</strong> only when a section maps onto a real distinction (VRAM blue, sys RAM amber, etc.) — not for visual variety</li>
+    <li>One callout style per block type: <strong>TL;DR</strong> = left-bar card; <strong>Example</strong> = dashed-border sidebar with "EXAMPLE" label; <strong>Gotchas</strong> = amber-tinted box. Don't invent new ones per page.</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h2><span class="num">5</span>Iteration rules — extracted from real feedback</h2>
+  <p>These rules came out of building two pages and listening to where they didn't work. They're the ones a v0 methodology would have missed.</p>
+
+  <table>
+    <tr><th>Rule</th><th>Trigger</th></tr>
+    <tr>
+      <td class="tag">Title from the question</td>
+      <td class="muted">v2 was initially titled "Training memory estimation". Real question turned out to be "How to choose the right instance" — memory is one of four lenses. Renamed the page and restructured around the question. <strong>Methodology rule: start by writing the question the page answers, derive the title from it, derive sections from the title.</strong></td>
+    </tr>
+    <tr>
+      <td class="tag">Name decision variables in the TL;DR</td>
+      <td class="muted">TL;DR originally said "scales with dataloader config". Reader noticed <code>batch_size</code> wasn't mentioned. Fixed to <code>num_workers × prefetch_factor × batch_size × per_sample_peak</code>. <strong>If a formula's parameters are decision variables for the reader, name them all in the TL;DR. Don't hide drivers behind "config".</strong></td>
+    </tr>
+    <tr>
+      <td class="tag">No single-letter abbreviations</td>
+      <td class="muted">Formula tables used <code>N × dtype_B</code> and <code>B × A_sample × dtype_B</code>. Reader asked what <code>B</code> and <code>A_sample</code> meant. <strong>Use full descriptive names in formulas, identical to those in the TL;DR.</strong></td>
+    </tr>
+    <tr>
+      <td class="tag">Pair formulas with concrete priors</td>
+      <td class="muted">Components table told you VRAM ∝ batch × activations but didn't tell you whether ResNet-50 needs a T4 or an H100. Added an "Orders of magnitude" table with 9 classic backbones. <strong>Formulas are dimensions; priors are magnitudes. Both are needed.</strong></td>
+    </tr>
+    <tr>
+      <td class="tag">Hedge consistently</td>
+      <td class="muted">Wrote "linear speedup until vCPU saturates" for workers, but "proportional speedup" (no hedge) for GPU upgrades. Same math, mixed terminology. <strong>Pick one scaling word, hedge it the same way every time it appears.</strong></td>
+    </tr>
+    <tr>
+      <td class="tag">Replace metaphors with measurements</td>
+      <td class="muted">Used "the smoking gun" to describe a CPU/GPU utilisation ratio. Reader: "blabla is the smoking gun is metaphorical". Replaced with the numbers themselves. <strong>If a number can carry the claim, let it.</strong></td>
+    </tr>
+    <tr>
+      <td class="tag">Subcategorise multi-option lists</td>
+      <td class="muted">Recommendations table had 4 rows, all marked with savings × effort, but didn't separate "removes the bottleneck" from "fewer steps" from "lower $/h". Grouped into three subcategories. <strong>When options differ in their mechanism, group by mechanism — don't flatten into a single list.</strong></td>
+    </tr>
+    <tr>
+      <td class="tag">Generic body, project example</td>
+      <td class="muted">v1 mixed S3D specifics into the main flow. v2 confined S3D to a labelled "Example" sidebar; the main text reads generically. <strong>Body answers the general question; one boxed sidebar anchors it in a real case.</strong></td>
+    </tr>
+    <tr>
+      <td class="tag">Build inductively, refine through feedback</td>
+      <td class="muted">A polished v0 methodology written upfront over-engineers. v0 + iteration + extraction is faster and produces sturdier rules. <strong>Methodology is the residue of iteration, not the seed.</strong></td>
+    </tr>
+    <tr>
+      <td class="tag">Match paragraph styling to purpose</td>
+      <td class="muted">In the dataset-strategies page, the decision-flow intro paragraph was muted / 13 px (section-framing style) but contained substantive content (5 shortcut categories the reader needs to recognise). Reader flagged it as "not very nice". Bumped to body ink / 14 px with the categories bold-inline. <strong>Rule: framing styles for framing; body styles for content. Don't bury content under framing.</strong></td>
+    </tr>
+    <tr>
+      <td class="tag">CSS Grid for columns, Flex for row rhythm</td>
+      <td class="muted">Decision-flow list used Grid with a <code>1fr</code> column for the question text. Result: phantom whitespace between question end and the arrow, varying per row based on text length — looked like "inconsistent spacing between words". Switched to Flex with <code>gap: 10px</code>; rows now have consistent inline rhythm at the cost of variable row width. <strong>Rule: Grid only when column alignment is load-bearing; Flex for inline rhythm. <code>1fr</code> in Grid creates phantom whitespace whenever content widths vary.</strong></td>
+    </tr>
+  </table>
+</div>
+
+<div class="example">
+  <h2><span class="ex-label">Example</span>Applying the protocol to "How to choose the right instance for model training"</h2>
+  <p>Worked example of how the protocol shaped one of the two existing v2 pagers.</p>
+
+  <table>
+    <tr><th style="width: 22%;">Step</th><th>Decision</th></tr>
+    <tr><td class="tag">Pre-flight Q1: Audience</td><td class="muted">Mixed (self + team + future hires). → density preserved; explanations terse.</td></tr>
+    <tr><td class="tag">Pre-flight Q2: Usage context</td><td class="muted">On-screen + occasional reference. → scrollable, rich layout, no single-page constraint.</td></tr>
+    <tr><td class="tag">Pre-flight Q3: Question</td><td class="muted">"Given a model + batch + workload, what's the cheapest box that finishes in tolerable wall clock?" → title becomes <em>How to choose the right instance for model training</em>, NOT <em>Memory estimation</em>.</td></tr>
+    <tr><td class="tag">Pre-flight Q4: Specificity</td><td class="muted">Generic body, S3D as example. → main flow is generic; S3D lives in a labelled "Example" sidebar.</td></tr>
+    <tr><td class="tag">Pre-flight Q5: Shape</td><td class="muted">Decision-guide. → 4-lens framework at top, sequential sections per lens, "pick smallest survivor".</td></tr>
+    <tr><td class="tag">Structure</td><td class="muted">Title + subtitle → TL;DR → framework box → 4 lens sections (VRAM, sys RAM, regime, cost) → boxed S3D example → pitfalls.</td></tr>
+    <tr><td class="tag">Density choices</td><td class="muted">Formula tables with "What it is" cells (no separate defs section). Orders-of-magnitude table pairs the VRAM formula. Examples use concrete numbers, not symbols.</td></tr>
+    <tr><td class="tag">Iteration triggers caught</td><td class="muted">"batch_size missing from TL;DR" → expanded formula. "What's B and A_sample?" → renamed all variables. "linear vs proportional" → consistent hedging. "subcategorise recommendations" → grouped by mechanism.</td></tr>
+  </table>
+</div>
+
+<div class="cut">
+  <h2>What to cut — tempting things that rot the page</h2>
+  <ul>
+    <li><strong>A separate "definitions" section</strong> that re-states what the formula table already says. The duplication looks educational but doubles the line count.</li>
+    <li><strong>Concept-name titles</strong> ("Memory estimation", "PyTorch dataset strategies"). Find the question the reader is asking when they reach the page; title accordingly.</li>
+    <li><strong>Single-letter variables without a legend.</strong> They feel obvious to the writer and opaque to the reader.</li>
+    <li><strong>Metaphors when measurements exist.</strong> "It's the smoking gun" is weaker than the numbers it refers to.</li>
+    <li><strong>"Useful tips" piles</strong> that aren't a real grouping. If you have 8 tips, ask whether they cluster into 2–3 categories.</li>
+    <li><strong>Project narration in the main flow.</strong> "We ran this on AIW-3499 and saw…" belongs in the labelled Example sidebar, not paragraph 3 of the framework.</li>
+    <li><strong>External JS or CDN dependencies.</strong> If the page only works online, it fails the offline-during-debugging use case.</li>
+    <li><strong>A "Further reading" list of every paper you've ever cited.</strong> Three pointers. Five at most. Else delete the section.</li>
+  </ul>
+</div>
+
+<div class="footer">
+  Protocol v1 · extracted from training_memory_estimation_v2 build · 2026-05-12
+</div>
+
+</body>
+</html>
