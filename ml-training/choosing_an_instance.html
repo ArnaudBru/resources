@@ -261,7 +261,7 @@
       <tr><td>ResNet-50</td><td class="num">26 M</td><td>img-cls 224², bs=64</td><td class="num">~6 GB</td><td>T4 (16 GB)</td></tr>
       <tr><td>ViT-B/16</td><td class="num">86 M</td><td>img-cls 224², bs=64</td><td class="num">~12 GB</td><td>T4 (tight) · A10G/L4</td></tr>
       <tr><td>ViT-L/16</td><td class="num">307 M</td><td>img-cls 224², bs=32</td><td class="num">~18 GB</td><td>A10G / L4 (24 GB)</td></tr>
-      <tr><td>S3D / I3D</td><td class="num">9–13 M</td><td>video 64-frame 224², bs=4</td><td class="num">~13 GB</td><td>A10G / L4</td></tr>
+      <tr><td>I3D (3D-CNN)</td><td class="num">12 M</td><td>video 64-frame 224², bs=4</td><td class="num">~13 GB</td><td>A10G / L4</td></tr>
       <tr><td>VideoMAE-B</td><td class="num">87 M</td><td>video 16-frame 224², bs=8</td><td class="num">~16 GB</td><td>A10G / L4</td></tr>
       <tr><td>Llama-3-8B · LoRA</td><td class="num">8 B</td><td>seq 2k, bs=4, frozen base</td><td class="num">~20 GB</td><td>A10G / L4 (24 GB)</td></tr>
       <tr><td>Llama-3-8B · full FT</td><td class="num">8 B</td><td>seq 2k, bs=4</td><td class="num">~100+ GB</td><td>H100 80 GB + ZeRO/FSDP</td></tr>
@@ -398,8 +398,8 @@
 </div>
 
 <div class="example">
-  <h2><span class="ex-label">Example</span>S3D video classifier on AWS SageMaker</h2>
-  <p>~9 M-param S3D, 64-frame 224² clips, bs=4, bf16 autocast, video augmentations. Applying the four lenses:</p>
+  <h2><span class="ex-label">Example</span>3D-CNN video classifier on AWS SageMaker</h2>
+  <p>~12 M-param video 3D-CNN (I3D class), 64-frame 224² clips, bs=4, bf16 autocast, video augmentations. Applying the four lenses:</p>
   <table>
     <tr><th>Lens</th><th>Result</th></tr>
     <tr>
