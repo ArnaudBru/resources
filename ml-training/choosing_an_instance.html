@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>How to choose the right instance for model training — v2</title>
+<style>
+  :root {
+    --ink: #1f2933;
+    --muted: #52606d;
+    --ok: #2f855a;
+    --warn: #b7791f;
+    --bad: #c53030;
+    --rule: #cbd2d9;
+    --paper: #fafbfc;
+    --card: #ffffff;
+    --code-bg: #f1f5f9;
+    --vram: #3182ce;
+    --sysram: #d69e2e;
+    --regime: #805ad5;
+    --cost: #38a169;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    color: var(--ink);
+    background: var(--paper);
+    margin: 0 auto;
+    padding: 28px 36px 48px;
+    line-height: 1.5;
+    font-size: 14px;
+    max-width: 1180px;
+  }
+  h1 { font-size: 24px; margin: 0 0 4px 0; letter-spacing: -0.01em; }
+  h2 { font-size: 17px; margin: 18px 0 6px 0; color: var(--ink); }
+  h2.lens { display: flex; align-items: baseline; gap: 10px; }
+  h2.lens .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  h2.lens.vram .num { background: var(--vram); }
+  h2.lens.sysram .num { background: var(--sysram); }
+  h2.lens.regime .num { background: var(--regime); }
+  h2.lens.cost .num { background: var(--cost); }
+  h3 { font-size: 11.5px; margin: 10px 0 4px 0; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+  p { margin: 4px 0; }
+  .subtitle { color: var(--muted); margin: 0 0 18px 0; font-size: 13.5px; }
+  code {
+    font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    background: var(--code-bg);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 0.92em;
+  }
+  /* TL;DR */
+  .tldr {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--ink);
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+  }
+  .tldr h3 { margin-top: 0; color: var(--ink); }
+  .tldr ul { margin: 6px 0 2px 18px; padding: 0; }
+  .tldr li { margin: 4px 0; }
+  /* Framework block */
+  .framework {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin-bottom: 18px;
+  }
+  .framework h3 { margin-top: 0; }
+  .framework ol { margin: 6px 0 2px 22px; padding: 0; }
+  .framework li { margin: 5px 0; }
+  .framework .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 3px;
+    color: white;
+    margin-right: 6px;
+    vertical-align: 1px;
+  }
+  .framework .tag.vram { background: var(--vram); }
+  .framework .tag.sysram { background: var(--sysram); }
+  .framework .tag.regime { background: var(--regime); }
+  .framework .tag.cost { background: var(--cost); }
+  /* Two-column cards (for memory section only) */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-top: 6px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 14px 18px 16px;
+  }
+  .card.vram { border-top: 4px solid var(--vram); }
+  .card.sysram { border-top: 4px solid var(--sysram); }
+  .card.regime { border-top: 4px solid var(--regime); }
+  .card.cost { border-top: 4px solid var(--cost); }
+  .card > p:first-of-type { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  /* Tables */
+  table { border-collapse: collapse; width: 100%; margin: 6px 0 2px; font-size: 12.8px; }
+  th, td { border-bottom: 1px solid var(--rule); padding: 5px 8px; text-align: left; vertical-align: top; }
+  th { color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; font-size: 10.5px; }
+  td.num { font-family: "SF Mono", Menlo, monospace; text-align: right; white-space: nowrap; }
+  td.intuition { color: var(--muted); font-size: 12.5px; }
+  /* Lists */
+  ul { margin: 4px 0 4px 18px; padding: 0; }
+  li { margin: 3px 0; }
+  /* Pills */
+  .pill {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    background: #e2e8f0;
+    color: var(--ink);
+  }
+  .pill.bad { background: #fed7d7; color: var(--bad); }
+  .pill.warn { background: #fef3c7; color: var(--warn); }
+  .pill.ok { background: #c6f6d5; color: var(--ok); }
+  /* Example sidebar */
+  .example {
+    background: #f8fafc;
+    border: 1px dashed var(--rule);
+    border-radius: 6px;
+    padding: 14px 18px 16px;
+    margin-top: 18px;
+  }
+  .example h2 { margin-top: 0; }
+  .example .ex-label {
+    display: inline-block;
+    background: var(--ink);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 3px;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+  .example td.lens-cell {
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--ink);
+  }
+  /* Gotchas */
+  .gotchas {
+    background: #fffaf0;
+    border: 1px solid #f5d997;
+    border-left: 4px solid var(--warn);
+    border-radius: 6px;
+    padding: 12px 16px 14px;
+    margin-top: 18px;
+  }
+  .gotchas h2 { margin-top: 0; }
+  .gotchas ul { margin: 4px 0 0 18px; padding: 0; }
+  .gotchas li { margin: 5px 0; }
+  /* Footer */
+  .footer {
+    margin-top: 22px;
+    color: var(--muted);
+    font-size: 11.5px;
+    text-align: right;
+  }
+  @media (max-width: 820px) {
+    .two-col { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<h1>How to choose the right instance for model training</h1>
+<p class="subtitle">Given a model + batch + workload, what's the cheapest box that finishes in tolerable wall clock?</p>
+
+<div class="tldr">
+  <h3>TL;DR</h3>
+  <ul>
+    <li><strong>Four lenses must all pass</strong>: capacity (VRAM + sys RAM), throughput (compute regime), cost (incl. quota). Pick the smallest instance where all four pass.</li>
+    <li><strong>VRAM</strong> = weights + grads + optimizer state + <strong>activations</strong> (dominant; linear in <code>batch_size × model_depth × dtype</code>). bf16 autocast gives ≈ <code>×0.55</code> the fp32 footprint.</li>
+    <li><strong>Sys RAM</strong> = DataLoader queue (linear in <code>num_workers × prefetch_factor × batch_size × per-sample_peak</code>) + per-worker process overhead. Per-sample peak is 2-3× the on-disk size after augmentation.</li>
+    <li><strong>Compute regime</strong> (GPU-bound vs dataloader-bound) is a throughput question. It tells you whether a bigger GPU helps or a bigger host helps — different fixes.</li>
+    <li><strong>Cost</strong> has a quiet trap: spot pricing is ~3× cheaper, but spot quota is per-(account, region, instance, mode) and is often zero on newer GPU classes. Check before you plan around it.</li>
+  </ul>
+</div>
+
+<div class="framework">
+  <h3>The framework — four lenses, applied in order</h3>
+  <ol>
+    <li><span class="tag vram">1</span><strong>VRAM ceiling</strong> — which GPUs fit the model + batch? Eliminates GPU classes that are too small.</li>
+    <li><span class="tag sysram">2</span><strong>Sys RAM ceiling</strong> — which host sizes fit the DataLoader queue + workers? Eliminates instance sizes that are too small.</li>
+    <li><span class="tag regime">3</span><strong>Compute regime</strong> — is the workload GPU-bound or dataloader-bound? Tells you which knob has any effect at all (bigger GPU vs more vCPU).</li>
+    <li><span class="tag cost">4</span><strong>Cost</strong> — among survivors of 1-3, pick the cheapest. Check spot quota before assuming spot pricing.</li>
+  </ol>
+  <p style="margin-top: 8px; font-size: 12.5px; color: var(--muted);">Reverse order trades off correctness: if you pick by cost first, you'll keep landing on instances that don't fit.</p>
+</div>
+
+<h2 class="lens vram"><span class="num">1</span>VRAM (which GPUs fit the model + batch)</h2>
+
+<div class="two-col">
+  <div class="card vram">
+    <p>Capped by the GPU: T4 = 16 GB · A10G / L4 = 24 GB · A100 = 40 / 80 GB · H100 = 80 GB.</p>
+    <h3>Components</h3>
+    <table>
+      <tr><th>Component</th><th>Formula</th><th>What it is</th></tr>
+      <tr>
+        <td>Model weights</td>
+        <td><code>params × bytes</code></td>
+        <td class="intuition">Float values on-GPU per param. fp32 = 4 bytes/param; bf16/fp16 = 2 bytes.</td>
+      </tr>
+      <tr>
+        <td>Gradients</td>
+        <td><code>params × bytes</code></td>
+        <td class="intuition">One value per param holding ∂L/∂param. Created by <code>backward()</code>, consumed by <code>optimizer.step()</code>.</td>
+      </tr>
+      <tr>
+        <td>Optimizer state (AdamW)</td>
+        <td><code>params × 8 bytes</code></td>
+        <td class="intuition">Two fp32 moments per param. Stays fp32 even under bf16 autocast — the "master copy" of training.</td>
+      </tr>
+      <tr>
+        <td>Activations</td>
+        <td><code>batch_size × activations_per_sample × bytes</code></td>
+        <td class="intuition">Layer outputs kept for backward. Dominant term. <code>activations_per_sample</code> grows with model depth × feature-map size — bigger model or higher input resolution = more.</td>
+      </tr>
+      <tr>
+        <td>CUDA context</td>
+        <td><code>~1–2 GB</code></td>
+        <td class="intuition">Per-process driver + cuDNN/cuBLAS + allocator pool. Independent of model size.</td>
+      </tr>
+      <tr>
+        <td>Fragmentation</td>
+        <td><code>~5–15 %</code></td>
+        <td class="intuition">Caching allocator never returns 100 % of chunks. Headroom for re-pack.</td>
+      </tr>
+    </table>
+
+    <h3>Orders of magnitude — classic backbones</h3>
+    <p style="font-size: 12px; color: var(--muted); margin-top: 2px;">Rough training-VRAM priors at bf16 autocast + AdamW + no activation checkpointing. ±30 % depending on framework, exact resolution, and implementation details. Inference is roughly <code>÷3</code> (no grads, no optimizer state).</p>
+    <table>
+      <tr><th>Backbone</th><th>Params</th><th>Config</th><th>VRAM</th><th>Smallest GPU</th></tr>
+      <tr><td>ResNet-50</td><td class="num">26 M</td><td>img-cls 224², bs=64</td><td class="num">~6 GB</td><td>T4 (16 GB)</td></tr>
+      <tr><td>ViT-B/16</td><td class="num">86 M</td><td>img-cls 224², bs=64</td><td class="num">~12 GB</td><td>T4 (tight) · A10G/L4</td></tr>
+      <tr><td>ViT-L/16</td><td class="num">307 M</td><td>img-cls 224², bs=32</td><td class="num">~18 GB</td><td>A10G / L4 (24 GB)</td></tr>
+      <tr><td>I3D (3D-CNN)</td><td class="num">12 M</td><td>video 64-frame 224², bs=4</td><td class="num">~13 GB</td><td>A10G / L4</td></tr>
+      <tr><td>VideoMAE-B</td><td class="num">87 M</td><td>video 16-frame 224², bs=8</td><td class="num">~16 GB</td><td>A10G / L4</td></tr>
+      <tr><td>Llama-3-8B · LoRA</td><td class="num">8 B</td><td>seq 2k, bs=4, frozen base</td><td class="num">~20 GB</td><td>A10G / L4 (24 GB)</td></tr>
+      <tr><td>Llama-3-8B · full FT</td><td class="num">8 B</td><td>seq 2k, bs=4</td><td class="num">~100+ GB</td><td>H100 80 GB + ZeRO/FSDP</td></tr>
+      <tr><td>Llama-3-70B · QLoRA</td><td class="num">70 B</td><td>seq 2k, bs=4, 4-bit base</td><td class="num">~40 GB</td><td>A100 40 GB</td></tr>
+      <tr><td>Llama-3-70B · full FT</td><td class="num">70 B</td><td>seq 2k</td><td class="num">~1 TB+</td><td>8× H100 + FSDP</td></tr>
+    </table>
+    <p style="font-size: 12px; color: var(--muted); margin-top: 4px;">Note the regime shift: for vision/video, <strong>activations dominate</strong> (linear in batch); for LLMs at moderate seq length, <strong>weights dominate</strong> (so smaller batch barely helps — sharding or LoRA does).</p>
+
+    <h3>Useful ratios</h3>
+    <ul>
+      <li><strong>bf16 vs fp32</strong>: halves weights + grads + activations. Net VRAM ≈ <code>×0.55</code>.</li>
+      <li><strong>Activation checkpointing</strong>: ~50 % activation memory for ~25 % step-time cost.</li>
+      <li><strong>Batch scaling</strong>: ~linear in activations. bs=4 @ 15 GB → bs=8 ≈ 24 GB (OOMs on 24 GB cards).</li>
+    </ul>
+  </div>
+
+  <div class="card sysram">
+    <h2 class="lens sysram" style="margin-top: 0;"><span class="num">2</span>Sys RAM (which hosts fit the dataloader)</h2>
+    <p>Capped by the instance. SageMaker g6.* on AWS: xlarge = 16 GB · 2xlarge = 32 · 4xlarge = 64 · 8xlarge = 128.</p>
+    <h3>Components</h3>
+    <table>
+      <tr><th>Component</th><th>Formula</th><th>What it is</th></tr>
+      <tr>
+        <td>DataLoader queue</td>
+        <td><code>num_workers × prefetch_factor × batch_size × per_sample_peak</code></td>
+        <td class="intuition">FIFO of decoded batches in multiprocessing shared memory. Dominant on video / large-tensor pipelines.</td>
+      </tr>
+      <tr>
+        <td>Worker processes</td>
+        <td><code>num_workers × (1–3 GB)</code></td>
+        <td class="intuition">Each is a forked Python with its own ffmpeg / torchvision state. Grows over training (GC lag).</td>
+      </tr>
+      <tr>
+        <td>Pin-memory thread</td>
+        <td><code>≥ 1 batch_size worth</code></td>
+        <td class="intuition">Copies batches to page-locked RAM for async GPU transfer. Required for <code>non_blocking=True</code>.</td>
+      </tr>
+      <tr>
+        <td>Augmentation transients</td>
+        <td><code>2–3 × on-disk_size per sample</code></td>
+        <td class="intuition">Rotate / resize buffers + <code>uint8→fp32</code> cast (4×). Peaks co-exist with in-flight clips.</td>
+      </tr>
+      <tr>
+        <td>FastFile / OS cache</td>
+        <td><code>1–4 GB</code></td>
+        <td class="intuition">S3 FUSE + Linux page cache hold recently-read bytes. Speeds later epochs but consumes RAM.</td>
+      </tr>
+      <tr>
+        <td>Main process</td>
+        <td><code>~2–3 GB</code></td>
+        <td class="intuition">Training script's Python + CUDA driver libs + iterator state. Floor before any work.</td>
+      </tr>
+    </table>
+    <h3>Useful ratios</h3>
+    <ul>
+      <li><strong><code>persistent_workers</code></strong>: skips per-epoch teardown. Workers stay warm but memory creeps.</li>
+      <li><strong><code>prefetch_factor</code></strong>: linear queue scaling. 2 → 1 halves queue RAM, less burst tolerance.</li>
+      <li><strong><code>num_workers</code></strong>: linear in both queue and worker overhead. Doubling ≈ doubles sys RAM.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="card regime" style="margin-top: 18px;">
+  <h2 class="lens regime" style="margin-top: 0;"><span class="num">3</span>Compute regime: GPU-bound or dataloader-bound?</h2>
+  <p>Tells you whether the next $/h goes into a bigger GPU or a bigger host. Two workloads with identical memory footprint can want opposite instance upgrades.</p>
+
+  <h3>How to tell</h3>
+  <table>
+    <tr><th>Signal</th><th>GPU-bound</th><th>Dataloader-bound</th></tr>
+    <tr>
+      <td>Per-step time</td>
+      <td>≈ GPU theoretical floor (FLOPs / chip TFLOPS at workload dtype)</td>
+      <td>≫ GPU floor (often 5-50×)</td>
+    </tr>
+    <tr>
+      <td>GPU util (CloudWatch / nvidia-smi)</td>
+      <td>60-100 % sustained</td>
+      <td>&lt; 30 % (often near 0 % at minute granularity)</td>
+    </tr>
+    <tr>
+      <td>CPU util</td>
+      <td>Low to medium</td>
+      <td>High; saturating vCPU</td>
+    </tr>
+    <tr>
+      <td>Effect of more <code>num_workers</code></td>
+      <td>None (bottleneck is GPU)</td>
+      <td>~Linear speedup until vCPU saturates</td>
+    </tr>
+    <tr>
+      <td>Effect of bigger GPU (more TFLOPS)</td>
+      <td>Proportional speedup</td>
+      <td>Nothing</td>
+    </tr>
+    <tr>
+      <td>Effect of more vCPU + sys RAM</td>
+      <td>Nothing</td>
+      <td>Speedup until pipeline saturates</td>
+    </tr>
+  </table>
+
+  <h3>Implication for instance choice</h3>
+  <ul>
+    <li><strong>GPU-bound</strong>: upgrade the GPU class (T4 → A10G/L4 → A100). Same family but better tensor cores can be 2-3×. Bigger host is wasted.</li>
+    <li><strong>Dataloader-bound</strong>: upgrade the host (more vCPU + sys RAM) and/or fix the data path (more workers, pre-decode, lighter augmentation). Bigger GPU is wasted.</li>
+    <li><strong>Diagnose before you spend</strong>: a smoke run + a glance at GPU util is faster than guessing.</li>
+  </ul>
+</div>
+
+<div class="card cost" style="margin-top: 18px;">
+  <h2 class="lens cost" style="margin-top: 0;"><span class="num">4</span>Cost (spot, quota, $/h)</h2>
+  <p>Among the candidates that passed 1-3, cost picks the winner. Two non-obvious facts dominate.</p>
+
+  <h3>Spot is ~3× cheaper, when you can get it</h3>
+  <ul>
+    <li>Spot vs on-demand: typically a 60-70 % discount.</li>
+    <li><strong>Spot quota is per-(account, region, instance type, mode)</strong>. Often zero on newer GPU classes until you ask. Check before you plan around it: <code>aws service-quotas list-service-quotas --service-code sagemaker --region &lt;r&gt;</code>.</li>
+    <li>Quota requests are free and granted in hours-days. File early if you might need it.</li>
+    <li>Spot is preemptible — pair with checkpointing if jobs are long.</li>
+  </ul>
+
+  <h3>Cheaper-per-hour ≠ cheapest job</h3>
+  <p>If your workload is dataloader-bound, a smaller-cheaper instance may finish slower than the per-hour ratio suggests. Run the per-step × total-steps × $/sec math, not just <code>$/h</code>.</p>
+
+  <h3>Common GPU choices (AWS, ballpark)</h3>
+  <table>
+    <tr><th>GPU</th><th>SageMaker family</th><th>VRAM</th><th>Notes</th></tr>
+    <tr><td>T4</td><td>g4dn</td><td>16 GB</td><td>Cheap, Turing — <strong>no native bf16</strong>. OK for small fp32 / fp16 models.</td></tr>
+    <tr><td>A10G</td><td>g5</td><td>24 GB</td><td>Mid-range Ampere. Full bf16 tensor cores. Quota varies by region.</td></tr>
+    <tr><td>L4</td><td>g6</td><td>24 GB</td><td>Newer Ada Lovelace. Same VRAM as A10G, often replacing g5 in newer accounts.</td></tr>
+    <tr><td>A100</td><td>p4d</td><td>40 / 80 GB</td><td>Premium. Multi-GPU available. Usually reserved-quota only.</td></tr>
+    <tr><td>H100</td><td>p5</td><td>80 GB</td><td>Premium+. Best for very large models or fp8.</td></tr>
+  </table>
+</div>
+
+<div class="example">
+  <h2><span class="ex-label">Example</span>3D-CNN video classifier on AWS SageMaker</h2>
+  <p>~12 M-param video 3D-CNN (I3D class), 64-frame 224² clips, bs=4, bf16 autocast, video augmentations. Applying the four lenses:</p>
+  <table>
+    <tr><th>Lens</th><th>Result</th></tr>
+    <tr>
+      <td class="lens-cell"><span class="pill" style="background: var(--vram); color: white;">1</span> VRAM</td>
+      <td>bs=4 bf16 ≈ ~13-15 GB → any 24 GB GPU works (A10G, L4). T4 (16 GB) fits at bs=4 fp32 only — no bf16 → loses ~2× throughput.</td>
+    </tr>
+    <tr>
+      <td class="lens-cell"><span class="pill" style="background: var(--sysram); color: white;">2</span> Sys RAM</td>
+      <td>workers=4, prefetch=2 → ~37 GB peak (queue dominates: <code>4 × 2 × 4 × ~0.7 GB</code> after augmentation). g6.2xlarge (32 GB) <span class="pill bad">OOMs</span>. <strong>g6.4xlarge (64 GB) floor.</strong></td>
+    </tr>
+    <tr>
+      <td class="lens-cell"><span class="pill" style="background: var(--regime); color: white;">3</span> Regime</td>
+      <td>Per-step 4.25 s vs ~0.3-0.5 s GPU floor → <strong>strongly dataloader-bound</strong>. CloudWatch confirms: GPU util ~0 %, CPU util ~680 %. <strong>More vCPU helps; bigger GPU doesn't.</strong></td>
+    </tr>
+    <tr>
+      <td class="lens-cell"><span class="pill" style="background: var(--cost); color: white;">4</span> Cost</td>
+      <td>g6 spot quota may be 0 in some regions above the xlarge size — on-demand may be the only option. <strong>ml.g6.4xlarge OD at ~$2.50/h</strong>. (g6.2xlarge OD wk=2 would be cheaper per hour but ~2× slower per step → projects to a more expensive baseline.)</td>
+    </tr>
+    <tr>
+      <td class="lens-cell"><strong>Decision</strong></td>
+      <td><strong><code>ml.g6.4xlarge</code> on-demand</strong> — smallest box where all four lenses pass.</td>
+    </tr>
+  </table>
+</div>
+
+<div class="gotchas">
+  <h2>Pitfalls</h2>
+  <ul>
+    <li><strong>Picking the biggest box "to be safe"</strong> — wastes 2-3× $/h on capacity you don't use. Memory and regime tell you the floor; bigger is not always better.</li>
+    <li><strong>Picking the smallest box because it's cheapest</strong> — OOMs cost a re-run, and one re-run usually wipes any savings. Worse: the failure may show up at hour-10 of a multi-day baseline.</li>
+    <li><strong>Assuming spot is available</strong> — check quotas explicitly. Many newer GPU classes are zero spot quota in your region until requested.</li>
+    <li><strong>Confusing VRAM OOM with sys-RAM OOM</strong> — different fixes, different upgrade direction. Read the Python traceback: <code>CUDA OOM</code> → VRAM; <code>DataLoader worker exited</code> → sys RAM.</li>
+    <li><strong>Static memory estimates underestimate</strong> peak sys RAM by ~20-30 % on video pipelines (augmentation transients). Add a margin or instrument.</li>
+    <li><strong>Bigger GPU when dataloader-bound</strong> — buys nothing. Profile GPU util first. A 0 % GPU on a $5/h box is worse than a 50 % GPU on a $1.50/h box.</li>
+    <li><strong>$/h ≠ $/job</strong>. A cheaper-per-hour box with a slower per-step can finish more expensively. Compute the full <code>per_step × total_steps × $/sec</code>.</li>
+  </ul>
+</div>
+
+<div class="footer">
+  v2 · instance-selection draft · 2026-05-12
+</div>
+
+</body>
+</html>

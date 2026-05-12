@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>How to choose the right PyTorch dataset pattern</title>
+<style>
+  :root {
+    --ink: #1f2933;
+    --muted: #52606d;
+    --ok: #2f855a;
+    --warn: #b7791f;
+    --bad: #c53030;
+    --rule: #cbd2d9;
+    --paper: #fafbfc;
+    --card: #ffffff;
+    --code-bg: #f1f5f9;
+    --accent: #3182ce;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    color: var(--ink);
+    background: var(--paper);
+    margin: 0 auto;
+    padding: 28px 36px 48px;
+    line-height: 1.5;
+    font-size: 14px;
+    max-width: 1180px;
+  }
+  h1 { font-size: 24px; margin: 0 0 4px 0; letter-spacing: -0.01em; }
+  h2 { font-size: 17px; margin: 18px 0 6px 0; color: var(--ink); }
+  h2.pattern { display: flex; align-items: baseline; gap: 10px; }
+  h2.pattern .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+    background: var(--accent);
+  }
+  h3 { font-size: 11.5px; margin: 10px 0 4px 0; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+  p { margin: 4px 0; }
+  .subtitle { color: var(--muted); margin: 0 0 18px 0; font-size: 13.5px; }
+  code {
+    font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    background: var(--code-bg);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 0.92em;
+  }
+  /* TL;DR */
+  .tldr {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--ink);
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin-bottom: 18px;
+  }
+  .tldr h3 { margin-top: 0; color: var(--ink); }
+  .tldr ul { margin: 6px 0 2px 18px; padding: 0; }
+  .tldr li { margin: 4px 0; }
+  /* Section card */
+  .section {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 14px 18px 16px;
+    margin-bottom: 18px;
+  }
+  .section > p:first-of-type { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  /* Tables */
+  table { border-collapse: collapse; width: 100%; margin: 6px 0 2px; font-size: 12.8px; }
+  th, td { border-bottom: 1px solid var(--rule); padding: 5px 8px; text-align: left; vertical-align: top; }
+  th { color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; font-size: 10.5px; }
+  td.num { font-family: "SF Mono", Menlo, monospace; text-align: right; white-space: nowrap; }
+  td.tag {
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--ink);
+  }
+  td.muted { color: var(--muted); font-size: 12.5px; }
+  /* Decision flow */
+  .decision-flow {
+    counter-reset: step;
+    margin: 8px 0 6px;
+    padding: 0;
+    list-style: none;
+  }
+  .decision-flow li {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--rule);
+  }
+  .decision-flow li:last-child { border-bottom: none; }
+  .decision-flow li::before {
+    counter-increment: step;
+    content: counter(step) ".";
+    font-weight: 700;
+    color: var(--muted);
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+  .decision-flow li .arrow {
+    color: var(--muted);
+    font-weight: 700;
+  }
+  .decision-flow li .pattern-name {
+    font-weight: 700;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  /* Per-pattern blocks */
+  .pattern-card {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 12px 18px 14px;
+    margin-bottom: 14px;
+  }
+  .pattern-card .used-for {
+    color: var(--muted);
+    font-size: 12.5px;
+    margin: 0 0 8px 0;
+  }
+  .pattern-card .used-for strong { color: var(--ink); }
+  .pattern-card .why-when {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 6px;
+  }
+  .pattern-card .why-when > div h4 {
+    margin: 0 0 4px;
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    font-weight: 700;
+  }
+  .pattern-card .why-when ul { margin: 0 0 0 18px; padding: 0; }
+  .pattern-card .why-when li { margin: 3px 0; font-size: 13px; }
+  .pattern-card .impl {
+    margin-top: 10px;
+    padding: 8px 10px;
+    background: var(--code-bg);
+    border-radius: 4px;
+    font-size: 12.5px;
+    color: var(--ink);
+  }
+  .pattern-card .impl strong { color: var(--ink); }
+  /* Pitfalls */
+  .gotchas {
+    background: #fffaf0;
+    border: 1px solid #f5d997;
+    border-left: 4px solid var(--warn);
+    border-radius: 6px;
+    padding: 12px 16px 14px;
+    margin-top: 18px;
+  }
+  .gotchas h2 { margin-top: 0; }
+  .gotchas table { margin: 4px 0 0 0; }
+  /* Footer */
+  .footer {
+    margin-top: 22px;
+    color: var(--muted);
+    font-size: 11.5px;
+    text-align: right;
+  }
+  @media (max-width: 760px) {
+    .pattern-card .why-when { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<h1>How to choose the right PyTorch dataset pattern</h1>
+<p class="subtitle">Picking among in-memory, lazy-read, pre-decoded, sharded, feature-cached, and streaming — by data size, iteration speed, and training shape.</p>
+
+<div class="tldr">
+  <h3>TL;DR</h3>
+  <ul>
+    <li><strong>Six patterns, but really three axes</strong>: where the data lives (RAM / local disk / cloud / stream), what's pre-computed (nothing / decoded tensors / features / all of it), and access shape (indexable vs streaming).</li>
+    <li><strong>Default to a map-style <code>Dataset</code> reading files lazily.</strong> It's the most flexible baseline; everything else is an optimisation earned by hitting a wall.</li>
+    <li><strong>Pre-compute more</strong> (pre-decoded tensors, pre-extracted features) when you'll do many epochs <em>and</em> decode is the per-step bottleneck.</li>
+    <li><strong>Shard or stream</strong> (WebDataset, IterableDataset) only when data is genuinely large-scale / distributed, or genuinely unbounded.</li>
+    <li><strong>Pitfalls are mostly cross-pattern</strong>: worker fork pitfalls, augmentation seeding, decode speed, S3 throughput, distributed sampling. Apply regardless of which pattern you pick.</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h2>Decision flow — apply in order, first match wins</h2>
+  <p style="color: var(--ink); font-size: 14px;">The earlier rows are shortcuts for specific shapes — <strong>small data</strong>, <strong>frozen backbone</strong>, <strong>streaming source</strong>, <strong>heavy decode</strong>, <strong>large-scale distributed</strong>. Most workloads fall through to the default.</p>
+
+  <ol class="decision-flow">
+    <li>
+      <span>Does the whole dataset fit comfortably in RAM (≲ 10 GB single-machine)?</span>
+      <span class="arrow">→</span>
+      <span class="pattern-name">In-memory</span>
+    </li>
+    <li>
+      <span>Training only a small head with a frozen backbone?</span>
+      <span class="arrow">→</span>
+      <span class="pattern-name">Pre-extracted features</span>
+    </li>
+    <li>
+      <span>Data is a true stream / generator (Kafka, RL trajectories, infinite corpus)?</span>
+      <span class="arrow">→</span>
+      <span class="pattern-name">IterableDataset</span>
+    </li>
+    <li>
+      <span>Many epochs AND decode is slow (video, high-resolution images)?</span>
+      <span class="arrow">→</span>
+      <span class="pattern-name">Pre-decoded tensors</span>
+    </li>
+    <li>
+      <span>≫ 100 k samples in cloud storage + distributed training?</span>
+      <span class="arrow">→</span>
+      <span class="pattern-name">Sharded (WebDataset / TFRecord)</span>
+    </li>
+    <li>
+      <span>Anything else — full fine-tune on disk/cloud data, single machine:</span>
+      <span class="arrow">→</span>
+      <span class="pattern-name default">Map-style + lazy read (default)</span>
+    </li>
+  </ol>
+</div>
+
+<div class="section">
+  <h2>Comparison at a glance</h2>
+  <p>What you spend (upfront, RAM, disk) vs. what you get (epoch speed, reusability).</p>
+
+  <table>
+    <tr>
+      <th>Pattern</th>
+      <th>Pre-compute cost</th>
+      <th>First-epoch speed</th>
+      <th>Steady-state speed</th>
+      <th>RAM</th>
+      <th>Disk</th>
+      <th>Reusable across runs?</th>
+    </tr>
+    <tr>
+      <td class="tag">In-memory</td>
+      <td>none</td>
+      <td class="muted">instant</td>
+      <td class="muted">fastest</td>
+      <td>full dataset</td>
+      <td>—</td>
+      <td>per-process only</td>
+    </tr>
+    <tr>
+      <td class="tag">Map-style + lazy read</td>
+      <td>none</td>
+      <td class="muted">slow (cold cache)</td>
+      <td class="muted">I/O + decode-bound</td>
+      <td>minimal</td>
+      <td>—</td>
+      <td>via the source files</td>
+    </tr>
+    <tr>
+      <td class="tag">Pre-decoded <code>.pt</code></td>
+      <td>one decode pass</td>
+      <td class="muted">slow (one-shot)</td>
+      <td class="muted">fast (just <code>torch.load</code>)</td>
+      <td>minimal</td>
+      <td>large (~10× mp4)</td>
+      <td>yes — disk artifact</td>
+    </tr>
+    <tr>
+      <td class="tag">Sharded (WebDataset)</td>
+      <td>one sharding pass</td>
+      <td class="muted">medium</td>
+      <td class="muted">fast, scales linearly with workers</td>
+      <td>minimal</td>
+      <td>medium</td>
+      <td>yes — S3-friendly</td>
+    </tr>
+    <tr>
+      <td class="tag">Pre-extracted features</td>
+      <td>one full inference pass</td>
+      <td class="muted">very slow (one-shot)</td>
+      <td class="muted">instant — small tensors</td>
+      <td>tiny</td>
+      <td>tiny</td>
+      <td>yes — but locks the backbone</td>
+    </tr>
+    <tr>
+      <td class="tag">IterableDataset</td>
+      <td>none</td>
+      <td class="muted">depends on source</td>
+      <td class="muted">depends on source</td>
+      <td>minimal</td>
+      <td>—</td>
+      <td>regenerates each iteration</td>
+    </tr>
+  </table>
+</div>
+
+<h2 style="margin-top: 24px;">The patterns in detail</h2>
+
+<div class="pattern-card">
+  <h2 class="pattern"><span class="num">1</span>In-memory</h2>
+  <p class="used-for"><strong>Used for:</strong> MNIST, small tabular sets, sentence-pair fine-tuning, cached embeddings.</p>
+  <div class="why-when">
+    <div>
+      <h4>Use when</h4>
+      <ul>
+        <li>Dataset fits comfortably in RAM (typically ≲ 10 GB), single machine.</li>
+        <li>You want the absolute fastest steady-state iteration.</li>
+        <li>You'll re-shuffle / random-sample heavily across epochs.</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Avoid when</h4>
+      <ul>
+        <li>Multi-GPU distributed (each GPU duplicates the dataset → 8× RAM).</li>
+        <li>Data ≳ 50 % of RAM (you'll OOM during peak augmentation transients).</li>
+        <li>You need to share/persist the loaded artifact.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="impl">
+    <strong>Pattern:</strong> load everything into a <code>list[Tensor]</code> or single concatenated tensor in <code>__init__</code>; <code>__getitem__</code> just indexes.
+  </div>
+</div>
+
+<div class="pattern-card">
+  <h2 class="pattern"><span class="num">2</span>Map-style + lazy read (the default)</h2>
+  <p class="used-for"><strong>Used for:</strong> image classification on ImageNet, video clips from mp4, audio from wav, anything where decode-at-training-time is acceptable.</p>
+  <div class="why-when">
+    <div>
+      <h4>Use when</h4>
+      <ul>
+        <li>Files live on local disk or cloud (S3, GCS) and you want zero upfront prep.</li>
+        <li>You'll fine-tune end-to-end and need raw inputs for augmentation flexibility.</li>
+        <li>Random sampling needs to be cheap (the index-to-file map is in memory).</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Avoid when</h4>
+      <ul>
+        <li>Decode dominates per-step time and you do many epochs (consider pattern 3 or 4).</li>
+        <li>Data is so large that even indexing it is expensive.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="impl">
+    <strong>Pattern:</strong> <code>__init__</code> stores a list of file paths + labels; <code>__getitem__</code> opens the file, decodes, augments. Tuning knobs: <code>num_workers</code> ≈ CPU count − 1; <code>persistent_workers=True</code>; <code>prefetch_factor=2-4</code>. First epoch is slow; the OS page cache warms it.
+  </div>
+</div>
+
+<div class="pattern-card">
+  <h2 class="pattern"><span class="num">3</span>Pre-decoded <code>.pt</code> on disk</h2>
+  <p class="used-for"><strong>Used for:</strong> long video-classification fine-tunes, repeated training over the same image dataset, hyperparameter sweeps where decode would dominate.</p>
+  <div class="why-when">
+    <div>
+      <h4>Use when</h4>
+      <ul>
+        <li>You'll iterate many times (sweeps, long fine-tunes) so the one-time decode pays back.</li>
+        <li>Local SSD has room (typically 5–10× the raw encoded size).</li>
+        <li>Augmentations can be expressed on tensors, not raw frames.</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Avoid when</h4>
+      <ul>
+        <li>You're still iterating on input resolution or frame count (every change forces a re-decode pass).</li>
+        <li>Storage is constrained — raw uint8 tensors are huge vs. mp4.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="impl">
+    <strong>Pattern:</strong> a one-shot <code>prepare_dataset.py</code> loops through, decodes, saves <code>&lt;id&gt;.pt</code> (or a sharded dict <code>{id: tensor}</code> for small datasets); <code>__getitem__</code> just <code>torch.load(f"{root}/{id}.pt")</code>. Tensors should be pinned / float16 to keep size down.
+  </div>
+</div>
+
+<div class="pattern-card">
+  <h2 class="pattern"><span class="num">4</span>Sharded streaming (WebDataset / TFRecord)</h2>
+  <p class="used-for"><strong>Used for:</strong> large-scale pretraining (LAION-style image-text, video pretraining at scale), distributed multi-GPU / multi-node training.</p>
+  <div class="why-when">
+    <div>
+      <h4>Use when</h4>
+      <ul>
+        <li>≫ 100 k samples, primarily in cloud storage (S3, GCS).</li>
+        <li>Distributed training (multi-node) — shards distribute cleanly across workers.</li>
+        <li>Access pattern is sequential-friendly (cloud reads are way faster sequentially).</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Avoid when</h4>
+      <ul>
+        <li>You need to subset / sort / random-sample by attribute (sequential reads ≠ random access mid-shard).</li>
+        <li>Dataset is small enough that the sharding pass costs more than it saves.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="impl">
+    <strong>Pattern:</strong> the <code>webdataset</code> library packages samples into <code>.tar</code> shards (or <code>.tar.gz</code> / <code>.parquet</code>). Each shard is read sequentially. For C++-speed decode pipelines, layer NVIDIA DALI on top.
+  </div>
+</div>
+
+<div class="pattern-card">
+  <h2 class="pattern"><span class="num">5</span>Pre-extracted features</h2>
+  <p class="used-for"><strong>Used for:</strong> CLIP / DINOv2 linear probes, fast head-architecture iteration, embedding-based retrieval pipelines.</p>
+  <div class="why-when">
+    <div>
+      <h4>Use when</h4>
+      <ul>
+        <li>Doing linear probing or training only a small head — backbone is genuinely frozen.</li>
+        <li>You want to iterate on the head in minutes per epoch on CPU.</li>
+        <li>No temporal / visual augmentation needed (or augmentations can be baked into preprocessing).</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Avoid when</h4>
+      <ul>
+        <li>You want any end-to-end accuracy from unfreezing the backbone (this pattern locks it).</li>
+        <li>Augmentations need to vary per epoch — features are pre-computed once.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="impl">
+    <strong>Pattern:</strong> a one-shot inference pass with a pretrained backbone; save <code>{name: feature_vec}</code> as a single <code>.pt</code> or <code>.npy</code>. Features are typically 768–4096 dim → ~1 MB per 1000 samples. Whole feature dataset usually fits in RAM (collapses to pattern 1).
+  </div>
+</div>
+
+<div class="pattern-card">
+  <h2 class="pattern"><span class="num">6</span>IterableDataset (streaming / generator)</h2>
+  <p class="used-for"><strong>Used for:</strong> RL trajectories, real-time data feeds (Kafka, message queues), very-large pretraining corpora where indexing the whole thing is impractical.</p>
+  <div class="why-when">
+    <div>
+      <h4>Use when</h4>
+      <ul>
+        <li>The data source is genuinely streaming (you can't pre-enumerate it).</li>
+        <li>The per-sample cost of being indexable would be prohibitive.</li>
+        <li>You want online sampling / on-the-fly generation.</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Avoid when</h4>
+      <ul>
+        <li>You can list your data upfront and want clean epoch semantics — use map-style.</li>
+        <li>You want easy random sampling — IterableDataset doesn't natively support it.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="impl">
+    <strong>Pattern:</strong> subclass <code>IterableDataset</code> with an <code>__iter__</code> generator. Sharding across DataLoader workers is manual (<code>worker_init_fn</code> + offset / skip), so for >1 worker you must hand-shard the stream.
+  </div>
+</div>
+
+<div class="gotchas">
+  <h2>Common pitfalls (apply across patterns)</h2>
+  <table>
+    <tr><th>Pitfall</th><th>Fix</th></tr>
+    <tr>
+      <td>Worker fork copies the whole Dataset object (S3 client, DB connection)</td>
+      <td>Lazy-init network clients <strong>inside</strong> <code>__getitem__</code>, or use <code>worker_init_fn</code> — not <code>__init__</code></td>
+    </tr>
+    <tr>
+      <td>Random transforms identical across workers (same seed)</td>
+      <td><code>torch.manual_seed(base_seed + worker_id)</code> in <code>worker_init_fn</code></td>
+    </tr>
+    <tr>
+      <td>JPEG / mp4 decode is the bottleneck</td>
+      <td>Use <code>Pillow-SIMD</code> or <code>torchvision.io.read_image</code> for JPEG; <code>decord</code> or <code>torchvision.io.read_video</code> for video</td>
+    </tr>
+    <tr>
+      <td>Augmentations are CPU-bound at higher batch sizes</td>
+      <td>Move to GPU with <code>kornia.augmentation</code> or NVIDIA DALI</td>
+    </tr>
+    <tr>
+      <td>S3 throughput cap on first epoch</td>
+      <td>Local LRU cache (e.g., 50 GB on SSD) — first epoch warms it, later epochs hit local</td>
+    </tr>
+    <tr>
+      <td>Class imbalance</td>
+      <td><code>WeightedRandomSampler(weights, num_samples=…, replacement=True)</code> — independent of dataset pattern</td>
+    </tr>
+    <tr>
+      <td>Distributed sampling</td>
+      <td><code>DistributedSampler(dataset, shuffle=True)</code> for map-style; WebDataset shards natively across ranks</td>
+    </tr>
+    <tr>
+      <td>Mixed dtypes (uint8 vs fp32) silently doubling memory</td>
+      <td>Keep tensors in <code>uint8</code> until the very end; convert + normalise inside the GPU forward when possible</td>
+    </tr>
+    <tr>
+      <td>Workers exit unexpectedly mid-training</td>
+      <td>Almost always a host-RAM OOM, not a code bug — see the training-memory one-pager for diagnosis</td>
+    </tr>
+  </table>
+</div>
+
+<div class="footer">
+  v2 · skill-built · 2026-05-12 · pairs with <code>~/Desktop/plans/html/training_memory_estimation_v2.html</code>
+</div>
+
+</body>
+</html>
