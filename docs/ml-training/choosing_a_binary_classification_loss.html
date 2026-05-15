@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Which loss for binary classification?</title>
+<style>
+  :root {
+    --ink: #1f2933;
+    --muted: #52606d;
+    --ok: #2f855a;
+    --warn: #b7791f;
+    --bad: #c53030;
+    --rule: #cbd2d9;
+    --paper: #fafbfc;
+    --card: #ffffff;
+    --code-bg: #f1f5f9;
+    --accent: #3182ce;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    color: var(--ink);
+    background: var(--paper);
+    margin: 0 auto;
+    padding: 28px 36px 48px;
+    line-height: 1.5;
+    font-size: 14px;
+    max-width: 1100px;
+  }
+  h1 { font-size: 24px; margin: 0 0 4px 0; letter-spacing: -0.01em; }
+  h2 { font-size: 17px; margin: 18px 0 6px 0; color: var(--ink); display: flex; align-items: baseline; gap: 10px; }
+  h2 .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+    background: var(--accent);
+  }
+  h3 { font-size: 11.5px; margin: 10px 0 4px 0; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+  p { margin: 4px 0; }
+  .subtitle { color: var(--muted); margin: 0 0 18px 0; font-size: 13.5px; }
+  code {
+    font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    background: var(--code-bg);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 0.92em;
+  }
+  /* TL;DR */
+  .tldr {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--ink);
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin-bottom: 18px;
+  }
+  .tldr h3 { margin-top: 0; color: var(--ink); }
+  .tldr ul { margin: 6px 0 2px 18px; padding: 0; }
+  .tldr li { margin: 4px 0; }
+  /* Section card */
+  .section {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 14px 18px 16px;
+    margin-bottom: 18px;
+  }
+  .section > p:first-of-type { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  /* Tables */
+  table { border-collapse: collapse; width: 100%; margin: 6px 0 2px; font-size: 12.8px; }
+  th, td { border-bottom: 1px solid var(--rule); padding: 5px 8px; text-align: left; vertical-align: top; }
+  th { color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; font-size: 10.5px; }
+  td.tag {
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--ink);
+    font-size: 12.5px;
+  }
+  td.muted { color: var(--muted); font-size: 12.5px; }
+  /* Matrix table — emphasise the diagonal */
+  .matrix th, .matrix td { text-align: center; }
+  .matrix td.cell {
+    padding: 10px 12px;
+    border: 1px solid var(--rule);
+  }
+  .matrix td.use { background: #f0fff4; }
+  .matrix td.avoid { background: #fff5f5; }
+  .matrix td.cell code { display: inline-block; margin-bottom: 4px; font-weight: 600; font-size: 12px; }
+  .matrix td.cell .verdict { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px; }
+  .matrix td.cell .verdict.use { background: #c6f6d5; color: var(--ok); }
+  .matrix td.cell .verdict.avoid { background: #fed7d7; color: var(--bad); }
+  .matrix td.cell .note { display: block; margin-top: 4px; color: var(--muted); font-size: 11.5px; text-align: left; }
+  /* Lists */
+  ul { margin: 4px 0 4px 18px; padding: 0; }
+  li { margin: 4px 0; }
+  /* Pills */
+  .pill {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    background: #e2e8f0;
+    color: var(--ink);
+  }
+  .pill.req { background: #c6f6d5; color: var(--ok); }
+  .pill.opt { background: #e2e8f0; color: var(--muted); }
+  /* Gotchas */
+  .gotchas {
+    background: #fffaf0;
+    border: 1px solid #fbd38d;
+    border-left: 4px solid var(--warn);
+    border-radius: 6px;
+    padding: 14px 18px 16px;
+    margin-top: 18px;
+  }
+  .gotchas h2 { margin-top: 0; display: block; }
+  .gotchas h2 .num { display: none; }
+  .gotchas ul { margin: 4px 0 0 18px; }
+  /* Footer */
+  .footer {
+    margin-top: 22px;
+    color: var(--muted);
+    font-size: 11.5px;
+    text-align: right;
+  }
+</style>
+</head>
+<body>
+
+<h1>Which loss for binary classification — BCE vs CE, with vs without logits?</h1>
+<p class="subtitle">A 2×2 decision matrix: loss family (BCE vs CE) on one axis, implementation form (with-logits vs without) on the other. The "with logits" diagonal is always right; the family choice depends on output shape and extensibility.</p>
+
+<div class="tldr">
+  <h3>TL;DR</h3>
+  <ul>
+    <li><strong>Always use the "with logits" variant</strong> (<code>BCEWithLogitsLoss</code> or <code>CrossEntropyLoss</code>). Mathematically equivalent to the non-logits form in fp32; <strong>required</strong> in fp16/bf16 autocast — non-logits variants produce <code>log(0) = -inf</code> when probabilities round to 0/1 in low precision.</li>
+    <li><strong>BCE vs CE for binary classification: equivalent math, different shape.</strong> BCE expects <code>(B,) or (B,1)</code> logits with float targets; CE expects <code>(B, 2)</code> logits with integer class targets. Same gradient flow, same accuracy at convergence.</li>
+    <li><strong>Pick by your model's output shape</strong>: <code>num_classes=1</code> → <code>BCEWithLogitsLoss</code>; <code>num_classes=2</code> → <code>CrossEntropyLoss</code>. Most pretrained backbones (ResNet, ViT, S3D) ship with C-output heads → CE is the drop-in.</li>
+    <li><strong>Pick by intended extensibility</strong>: CE extends trivially to <code>num_classes=N</code>; BCE-per-class extends to multi-label (mutually inclusive classes). Single-label N-class with BCE doesn't make sense.</li>
+    <li><strong>Class imbalance handling</strong>: CE uses a per-class <code>weight</code> vector; BCE uses a scalar <code>pos_weight</code>. Both work; pick the one whose API matches your loss family.</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h2><span class="num">1</span>The 2×2 matrix</h2>
+  <p>Four cells, two of which you'd actually use in new PyTorch code. The "with logits" column wins on stability; the rows are equivalent to each other for binary tasks but differ on output-shape ergonomics.</p>
+
+  <table class="matrix">
+    <tr>
+      <th></th>
+      <th>With logits (recommended)</th>
+      <th>Without logits (legacy)</th>
+    </tr>
+    <tr>
+      <td class="tag" style="text-align: left;">BCE family<br><span style="font-weight: 400; color: var(--muted); font-size: 11.5px;">1-output binary</span></td>
+      <td class="cell use">
+        <code>nn.BCEWithLogitsLoss</code>
+        <span class="verdict use">use</span>
+        <span class="note">Input: <code>(B,)</code> or <code>(B, 1)</code> raw logits. Target: float in <code>{0., 1.}</code>. Fuses sigmoid + BCE in one pass via LogSumExp.</span>
+      </td>
+      <td class="cell avoid">
+        <code>nn.BCELoss</code>
+        <span class="verdict avoid">avoid</span>
+        <span class="note">Input: probabilities in <code>[0, 1]</code> (sigmoid applied at model end). Target: float in <code>{0., 1.}</code>. Breaks under bf16/fp16: <code>sigmoid(50) → 1.0</code>, then <code>log(1) = 0</code> (loses info) or <code>log(0) = -inf</code> (NaN).</span>
+      </td>
+    </tr>
+    <tr>
+      <td class="tag" style="text-align: left;">CE family<br><span style="font-weight: 400; color: var(--muted); font-size: 11.5px;">N-output multi-class<br>(N=2 for binary)</span></td>
+      <td class="cell use">
+        <code>nn.CrossEntropyLoss</code>
+        <span class="verdict use">use</span>
+        <span class="note">Input: <code>(B, N)</code> raw logits. Target: long in <code>{0, …, N−1}</code>. Fuses log-softmax + NLL in one pass via LogSumExp. Native <code>label_smoothing</code> + <code>weight</code> kwargs.</span>
+      </td>
+      <td class="cell avoid">
+        <code>nn.NLLLoss</code> (after manual <code>log_softmax</code>)
+        <span class="verdict avoid">avoid</span>
+        <span class="note">Input: log-probabilities. Target: long. Two-step pipeline; same low-precision failure mode as <code>BCELoss</code>. Mostly used in tutorials to demystify CE.</span>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2><span class="num">2</span>Decision guide — pick the form first, then the family</h2>
+  <p>Form (with-logits vs without) is a stability question with a near-universal answer. Family (BCE vs CE) is an architecture question that depends on your output shape and future plans.</p>
+
+  <h3>Step 1 — Lock the form: "with logits"</h3>
+  <p>Unless you're integrating a pre-existing model that already outputs probabilities and you cannot move the activation, use the with-logits variant. The cost is zero; the benefit is correctness under mixed precision.</p>
+
+  <h3>Step 2 — Pick the family by output shape</h3>
+  <table>
+    <tr><th>If your model outputs…</th><th>Use</th><th>Target shape + type</th></tr>
+    <tr><td class="tag"><code>(B, 1)</code> or <code>(B,)</code> — single logit per sample</td><td><code>BCEWithLogitsLoss</code></td><td><code>(B,)</code> float in <code>{0., 1.}</code></td></tr>
+    <tr><td class="tag"><code>(B, 2)</code> — two logits per sample (one per class)</td><td><code>CrossEntropyLoss</code></td><td><code>(B,)</code> long in <code>{0, 1}</code></td></tr>
+    <tr><td class="tag"><code>(B, N)</code> with N &gt; 2 — multi-class single-label</td><td><code>CrossEntropyLoss</code></td><td><code>(B,)</code> long in <code>{0, …, N−1}</code></td></tr>
+    <tr><td class="tag"><code>(B, N)</code> with N &gt; 1 — multi-label (mutually inclusive classes)</td><td><code>BCEWithLogitsLoss</code> applied per-class</td><td><code>(B, N)</code> float in <code>{0., 1.}^N</code></td></tr>
+  </table>
+
+  <h3>Step 3 — Re-shape the model if neither family fits ergonomically</h3>
+  <p>If you're building from scratch and have no constraint, the "natural" binary-classifier output is <code>(B, 1)</code> → BCE. If you're fine-tuning a pretrained C-class backbone (ResNet, ViT, S3D, BERT), keep the C-class head and use CE — that's the canonical pattern across torchvision, transformers, and timm.</p>
+</div>
+
+<div class="section">
+  <h2><span class="num">3</span>Why "with logits" — the numerical-stability deep dive</h2>
+  <p>The "with logits" form fuses the activation into the loss using the LogSumExp trick. The non-logits form computes the activation as a separate forward step, which can saturate in low precision.</p>
+
+  <h3>The formula difference</h3>
+  <table>
+    <tr><th>Form</th><th>Computation</th><th>Failure mode</th></tr>
+    <tr>
+      <td class="tag">Without logits (binary)</td>
+      <td><code>−[target · log(sigmoid(logit)) + (1−target) · log(1−sigmoid(logit))]</code></td>
+      <td><code>sigmoid(logit)</code> rounds to <code>0</code> or <code>1</code> in fp16/bf16 → <code>log(0) = −inf</code> → NaN gradients.</td>
+    </tr>
+    <tr>
+      <td class="tag">With logits (binary)</td>
+      <td><code>−[target · z − log(1 + exp(z)) − (1−target) · log(1 + exp(z))]</code> via LogSumExp</td>
+      <td>Stable across the full float range. Never computes <code>sigmoid</code> or <code>log</code> as a separate step.</td>
+    </tr>
+    <tr>
+      <td class="tag">Without logits (multi-class)</td>
+      <td><code>NLL(log_softmax(logits))</code> — two passes</td>
+      <td>Same as binary: <code>softmax</code> entries can underflow to <code>0</code> in low precision, then <code>log(0) = −inf</code>.</td>
+    </tr>
+    <tr>
+      <td class="tag">With logits (multi-class)</td>
+      <td><code>log_softmax</code> + NLL fused; <code>−(logit_c − LogSumExp(logits))</code></td>
+      <td>Stable. The LogSumExp subtracts the max logit before exponentiating, keeping all exp arguments ≤ 0.</td>
+    </tr>
+  </table>
+
+  <h3>What this means for mixed-precision training</h3>
+  <p>If your forward pass runs under <code>torch.autocast("cuda", dtype=torch.bfloat16)</code> (or fp16), the model outputs are bf16. Without-logits losses then take a bf16 probability and apply <code>log</code> — the bf16 representation of <code>sigmoid(z)</code> for <code>|z| &gt; ~8</code> already saturates to <code>0</code> or <code>1</code>, and <code>log</code> can't recover the information. The with-logits form sidesteps the saturated intermediate by computing the log-probability directly from the raw logit.</p>
+
+  <h3>The math is invariant under fp32, so what?</h3>
+  <p>Even when fp32 is enough for stability, the with-logits form is faster (one fused CUDA kernel vs two), supports native label smoothing and class weighting, and decouples the model from the loss (the model produces logits; the loss interprets them). The form choice has no downside except for legacy interop.</p>
+</div>
+
+<div class="section">
+  <h2><span class="num">4</span>BCE vs CE comparison — when the choice actually matters</h2>
+  <p>Math is equivalent for binary classification, but the API and integration ergonomics differ.</p>
+
+  <table>
+    <tr><th>Axis</th><th>BCE (BCEWithLogitsLoss)</th><th>CE (CrossEntropyLoss)</th></tr>
+    <tr>
+      <td class="tag">Output shape</td>
+      <td>1 logit per sample; final layer is e.g. <code>Linear(d, 1)</code>.</td>
+      <td>N logits per sample; final layer is <code>Linear(d, N)</code>. For binary, N=2.</td>
+    </tr>
+    <tr>
+      <td class="tag">Target type</td>
+      <td>Float in <code>{0., 1.}</code>.</td>
+      <td>Long class index in <code>{0, …, N−1}</code>.</td>
+    </tr>
+    <tr>
+      <td class="tag">Final layer parameters</td>
+      <td><code>d × 1 + 1</code></td>
+      <td><code>d × N + N</code> — negligible difference for d ≫ N.</td>
+    </tr>
+    <tr>
+      <td class="tag">Class-imbalance API</td>
+      <td>Scalar <code>pos_weight</code> — up-weights the positive-class contribution.</td>
+      <td>Per-class <code>weight</code> tensor of length N — independently scales each class's contribution.</td>
+    </tr>
+    <tr>
+      <td class="tag">Label smoothing</td>
+      <td>Manual: rewrite targets to <code>0.05</code> / <code>0.95</code>.</td>
+      <td>Native: <code>nn.CrossEntropyLoss(label_smoothing=0.1)</code>.</td>
+    </tr>
+    <tr>
+      <td class="tag">Multi-class extensibility</td>
+      <td>Not natural. Would need to switch to multi-label-per-class.</td>
+      <td>Trivial: bump <code>num_classes</code>.</td>
+    </tr>
+    <tr>
+      <td class="tag">Multi-label extensibility</td>
+      <td>Natural: apply per-class with N output logits + N float targets.</td>
+      <td>No: softmax forces mutual exclusion.</td>
+    </tr>
+    <tr>
+      <td class="tag">Community defaults</td>
+      <td>fastai, scikit-learn-style probabilistic interfaces, textbook treatments (Goodfellow, CS231n).</td>
+      <td>HuggingFace, torchvision, timm, MMAction, Karpathy's nanoGPT — anything with a pretrained C-class head.</td>
+    </tr>
+    <tr>
+      <td class="tag">Convergence and accuracy</td>
+      <td colspan="2" class="muted">Indistinguishable in practice when both implementations are correct. Choose by ergonomics, not by hoped-for accuracy lift.</td>
+    </tr>
+  </table>
+</div>
+
+<div class="gotchas">
+  <h2>Common pitfalls</h2>
+  <ul>
+    <li><strong>Applying sigmoid/softmax in the model's <code>forward</code> when the loss expects logits.</strong> No PyTorch error — the loss silently computes the wrong thing (applies log-sigmoid to already-sigmoided values, badly mis-scaling gradients). Always: model produces logits, loss interprets them.</li>
+    <li><strong>Using <code>BCELoss</code> with bf16/fp16 autocast.</strong> Trains fine for a few iterations, then produces NaN losses as logits drift to the saturating end of sigmoid. Symptom: <code>train_loss</code> goes to <code>nan</code> mid-epoch with no other warning. Fix: switch to <code>BCEWithLogitsLoss</code>.</li>
+    <li><strong>Forgetting that <code>CrossEntropyLoss</code> targets are class indices, not one-hot.</strong> Passing one-hot float targets to CE produces a confusing error about expected long tensor; passing class indices to BCE produces a shape mismatch.</li>
+    <li><strong>Class-weighted CE with the wrong index order.</strong> The <code>weight</code> tensor is indexed by class id, so <code>weight=[1.0, pos_weight]</code> assumes class 0 = negative, class 1 = positive. If your labels flip, the weighting silently inverts.</li>
+    <li><strong>BCE's <code>pos_weight</code> ≠ CE's <code>weight[1]</code> mathematically.</strong> BCE's <code>pos_weight</code> multiplies only the positive-class log-likelihood; CE's per-class <code>weight</code> rescales the whole sample's contribution. Numerically similar at small imbalance, divergent at heavy imbalance.</li>
+    <li><strong>Mixing the forms across the train/inference boundary.</strong> If training uses <code>BCEWithLogitsLoss</code>, inference must apply <code>sigmoid</code> on the model output to get probabilities. Forgetting this means downstream code interprets raw logits as probabilities — probably-wrong thresholds, broken precision-recall.</li>
+    <li><strong>Conflating "single-output binary" with "two-output binary".</strong> Both are valid binary classifiers; they just match different losses. Don't try to use <code>CrossEntropyLoss</code> on a <code>(B, 1)</code> output — it errors. Don't try to use <code>BCEWithLogitsLoss</code> on a <code>(B, 2)</code> output — it computes the wrong thing.</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h2><span class="num">5</span>References</h2>
+  <ul>
+    <li><a href="https://pytorch.org/docs/stable/generated/torch.nn.BCEWithLogitsLoss.html"><code>nn.BCEWithLogitsLoss</code></a> and <a href="https://pytorch.org/docs/stable/generated/torch.nn.CrossEntropyLoss.html"><code>nn.CrossEntropyLoss</code></a> — PyTorch docs explicitly recommend the with-logits forms for stability.</li>
+    <li><a href="https://www.deeplearningbook.org/contents/mlp.html">Goodfellow et al., <em>Deep Learning</em>, Chapter 6.2</a> — derivation of binary cross-entropy as the canonical binary loss; argues for sigmoid + BCE on first principles.</li>
+    <li><a href="https://cs231n.github.io/linear-classify/">Stanford CS231n notes on linear classification</a> — sigmoid neuron for binary, softmax for multi-class; the standard taxonomy.</li>
+    <li><a href="https://docs.fast.ai/losses.html">fastai loss functions documentation</a> — pragmatic recommendations for production binary classifiers; defaults to <code>BCEWithLogitsLossFlat</code>.</li>
+    <li><a href="https://pytorch.org/docs/stable/amp.html">PyTorch automatic mixed precision</a> — the stability constraint that makes "with logits" non-negotiable under bf16/fp16.</li>
+  </ul>
+</div>
+
+<div class="footer">
+  Built with the practical one-pager protocol · 2026-05-15
+</div>
+
+</body>
+</html>
