@@ -14,3 +14,7 @@ Hosted version (HTML one-pagers render directly): **https://arnaudbru.github.io/
   - [Folder overview](ml-training/README.md)
 - Skills
   - [One-pager protocol](skills/one-pager-protocol/README.md) — Claude Code skill that automates building practical HTML reference docs
+- Self-supervised learning (vision)
+  - [Fiches de compréhension](https://arnaudbru.github.io/resources/ssl/) — 7 interactive fiches (attention, ViT, DINO, JEPA, MAE/iBOT, contrastive, history) with checkboxes for 23 expertise questions, progress saved locally
+  - [Cheatsheet](https://arnaudbru.github.io/resources/ssl/cheatsheet.html) — SSL taxonomy, anti-collapse mechanisms table, recurring components, eval protocols, timeline
+  - [Fast-track curriculum](ssl/README.md)
