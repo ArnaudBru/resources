@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cheat sheet — Self-Supervised Learning (Vision)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,720&family=Spectral:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FBFAF7; --ink:#1B2230; --soft:#4A5468; --rule:#E3E0D8; --card:#fff;
+  --contrast:#6A7F1F; --cluster:#2E7DB8; --distill:#0F8A6C; --cov:#5B4FD6;
+  --mim:#B84A6E; --latent:#C2731F; --pretext:#7A6A55;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:'Spectral',Georgia,serif;line-height:1.6}
+.wrap{max-width:1100px;margin:0 auto;padding:2rem 1.3rem 4rem}
+@media(max-width:700px){.wrap{padding:1.3rem .9rem 3rem}}
+
+.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--soft)}
+h1{font-family:'Fraunces',serif;font-weight:720;font-size:clamp(1.8rem,4.5vw,2.7rem);letter-spacing:-.015em;line-height:1.1;margin:.4rem 0 .5rem}
+.lede{color:var(--soft);max-width:60ch;margin-bottom:2rem}
+
+h2{font-family:'Fraunces',serif;font-weight:600;font-size:1.35rem;margin:2.6rem 0 .3rem;letter-spacing:-.01em}
+.h2sub{color:var(--soft);font-size:.92rem;margin-bottom:1rem}
+
+/* ---- arbre taxonomie ---- */
+.tree{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:1.2rem 1.3rem;overflow-x:auto}
+.tree pre{font-family:'IBM Plex Mono',monospace;font-size:.82rem;line-height:1.75;white-space:pre}
+.tree .je{color:var(--distill);font-weight:600}
+.tree .rc{color:var(--mim);font-weight:600}
+
+/* ---- tableau familles ---- */
+.fam{display:grid;gap:.75rem;margin-bottom:1rem}
+.f{background:var(--card);border:1px solid var(--rule);border-left:5px solid var(--c);border-radius:8px;padding:.95rem 1.1rem}
+.f h3{font-family:'IBM Plex Mono',monospace;font-size:.82rem;letter-spacing:.06em;text-transform:uppercase;color:var(--c);margin-bottom:.35rem;display:flex;gap:.6rem;align-items:baseline;flex-wrap:wrap}
+.f h3 .yr{font-size:.68rem;color:var(--soft);letter-spacing:.02em;text-transform:none}
+.f .mech{font-weight:600;margin-bottom:.35rem}
+.f .algos{font-family:'IBM Plex Mono',monospace;font-size:.78rem;color:var(--soft);margin-top:.45rem}
+.f .algos b{color:var(--ink);font-weight:600}
+.f .kill{font-size:.9rem;color:var(--soft);margin-top:.3rem}
+.f .kill b{color:var(--ink)}
+
+/* ---- tables ---- */
+.tbl{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--rule);border-radius:8px;overflow:hidden;font-size:.9rem}
+.tbl th{font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;text-align:left;padding:.6rem .8rem;background:var(--paper);border-bottom:1px solid var(--rule);color:var(--soft);font-weight:600}
+.tbl td{padding:.55rem .8rem;border-bottom:1px solid var(--rule);vertical-align:top}
+.tbl tr:last-child td{border-bottom:none}
+.yes{color:var(--distill);font-weight:600}
+.no{color:#B84A6E;font-weight:600}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+/* ---- timeline ---- */
+.tl{border-left:2px solid var(--rule);padding-left:1.2rem;margin-left:.4rem}
+.tl .ev{position:relative;padding-bottom:.85rem}
+.tl .ev::before{content:"";position:absolute;left:-1.55rem;top:.5em;width:9px;height:9px;border-radius:50%;background:var(--c,var(--soft));border:2px solid var(--paper)}
+.tl .yr{font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--soft);letter-spacing:.06em}
+.tl .ttl{font-weight:600}
+.tl .d{font-size:.9rem;color:var(--soft)}
+
+/* ---- notes ---- */
+.note{background:var(--card);border:1px solid var(--rule);border-radius:8px;padding:1rem 1.15rem;margin-bottom:.8rem;font-size:.93rem}
+.note b{font-weight:600}
+.key{border-left:4px solid var(--distill)}
+.warn{border-left:4px solid var(--mim)}
+
+ul{list-style:none} li{padding-left:1.1rem;position:relative;margin-bottom:.4rem}
+li::before{content:"";position:absolute;left:0;top:.62em;width:6px;height:6px;border-radius:2px;background:var(--soft);opacity:.5}
+code{font-family:'IBM Plex Mono',monospace;font-size:.86em;background:var(--paper);border:1px solid var(--rule);border-radius:4px;padding:.03em .3em}
+footer{color:var(--soft);font-size:.82rem;margin-top:2.5rem;border-top:1px solid var(--rule);padding-top:1rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="eyebrow">Vision · référence rapide</div>
+<h1>Cheat sheet — Self-Supervised Learning</h1>
+<p class="lede">Le self-supervised learning regroupe les méthodes dont le signal d'entraînement provient de la donnée elle-même, sans annotation humaine. Contrastif, clustering, distillation et masking en sont des sous-familles.</p>
+
+<!-- ============ TAXONOMIE ============ -->
+<h2>La taxonomie</h2>
+<p class="h2sub">Premier axe de classification : <strong>joint-embedding</strong> (comparer les représentations de deux vues) ou <strong>reconstructif</strong> (exploiter la structure interne d'une seule image).</p>
+<div class="tree"><pre>Self-Supervised Learning
+│
+├─ <span class="je">JOINT-EMBEDDING</span>  — comparer les représentations de deux vues
+│   ├─ Contrastif .............. SimCLR, MoCo v1/v2/v3
+│   ├─ Clustering ............... SwAV, DeepCluster
+│   ├─ Self-distillation ........ BYOL, SimSiam, DINO, DINOv2, DINOv3
+│   └─ Covariance ............... Barlow Twins, VICReg
+│
+└─ <span class="rc">RECONSTRUCTIF / PRÉDICTIF</span>  — exploiter une seule image
+    ├─ Masked modeling .......... BEiT, MAE, iBOT, VideoMAE
+    ├─ Prédiction latente ....... data2vec, I-JEPA, V-JEPA, V-JEPA 2
+    └─ Pretext tasks ............ RotNet, Jigsaw, Colorization, Context pred.</pre></div>
+
+<div class="note key" style="margin-top:.8rem"><b>Méthodes hybrides.</b> Les modèles les plus performants combinent plusieurs familles : iBOT = masked modeling + self-distillation ; DINOv2/v3 = DINO (global) + iBOT (dense) ; JEPA = masking + cible latente produite par un teacher EMA.</div>
+
+<!-- ============ FAMILLES ============ -->
+<h2>Les 7 familles</h2>
+<p class="h2sub">Chaque famille est caractérisée par son mécanisme d'apprentissage et sa parade au collapse.</p>
+
+<div class="fam">
+  <div class="f" style="--c:var(--contrast)">
+    <h3>Contrastif <span class="yr">2018 – 2021</span></h3>
+    <div class="mech">Rapprocher les vues d'une même image, éloigner toutes les autres.</div>
+    <div class="kill">Anti-collapse : <b>les négatifs repoussent.</b> Clé : température, taille de batch, choix des augmentations.</div>
+    <div class="algos"><b>SimCLR</b> · <b>MoCo v1/v2/v3</b> · CPC · (CLIP = contrastif mais <em>weakly supervised</em>)</div>
+  </div>
+
+  <div class="f" style="--c:var(--cluster)">
+    <h3>Clustering <span class="yr">2018 – 2020</span></h3>
+    <div class="mech">Assigner les vues à des prototypes partagés, sous contrainte d'équipartition.</div>
+    <div class="kill">Anti-collapse : <b>l'équipartition</b> (Sinkhorn) force l'étalement sur tous les prototypes.</div>
+    <div class="algos"><b>SwAV</b> (+ multi-crop, hérité par DINO) · DeepCluster</div>
+  </div>
+
+  <div class="f" style="--c:var(--distill)">
+    <h3>Self-distillation <span class="yr">2020 – aujourd'hui</span></h3>
+    <div class="mech">Un côté prédit l'autre ; la cible ne reçoit pas de gradient.</div>
+    <div class="kill">Anti-collapse : <b>une asymétrie entre les deux branches</b>, sous deux formes distinctes — <em>architecturale</em> chez BYOL/SimSiam (predictor + stop-gradient), <em>statistique</em> chez DINO (centering + sharpening des sorties du teacher, sans predictor). Le stop-gradient est commun aux deux.</div>
+    <div class="algos"><b>BYOL</b> · <b>SimSiam</b> · <b>DINO</b> · <b>DINOv2</b> · <b>DINOv3</b> ← SOTA</div>
+  </div>
+
+  <div class="f" style="--c:var(--cov)">
+    <h3>Covariance <span class="yr">2021</span></h3>
+    <div class="mech">Décorréler les dimensions pour qu'aucune ne soit redondante.</div>
+    <div class="kill">Anti-collapse : <b>contrainte explicite sur la matrice de covariance</b> (ni négatifs, ni EMA, ni predictor).</div>
+    <div class="algos"><b>Barlow Twins</b> · <b>VICReg</b></div>
+  </div>
+
+  <div class="f" style="--c:var(--mim)">
+    <h3>Masked image modeling <span class="yr">2021 – aujourd'hui</span></h3>
+    <div class="mech">Masquer une grande part de l'image et reconstruire ce qui manque.</div>
+    <div class="kill">Pas de problème de collapse : la cible est externe, la sortie constante est simplement fausse.</div>
+    <div class="algos"><b>MAE</b> (pixels, 75 %) · <b>BEiT</b> (tokens discrets) · <b>iBOT</b> (cible = teacher EMA) · <b>VideoMAE</b> (90 %+)</div>
+  </div>
+
+  <div class="f" style="--c:var(--latent)">
+    <h3>Prédiction latente <span class="yr">2022 – aujourd'hui</span></h3>
+    <div class="mech">Prédire la <em>représentation</em> des parties masquées, pas leur contenu.</div>
+    <div class="kill">Collapse possible (la cible vient du modèle) → target encoder EMA + predictor, comme BYOL.</div>
+    <div class="algos"><b>data2vec</b> · <b>I-JEPA</b> · <b>V-JEPA</b> · <b>V-JEPA 2</b> (world model, robotique)</div>
+  </div>
+
+  <div class="f" style="--c:var(--pretext)">
+    <h3>Pretext tasks <span class="yr">2015 – 2018</span></h3>
+    <div class="mech">Résoudre une tâche artificielle dont la réponse est connue d'avance.</div>
+    <div class="kill">Pas de collapse — mais <b>plafonnent</b> : le modèle n'apprend que le minimum nécessaire à la tâche.</div>
+    <div class="algos">Context prediction · <b>Jigsaw</b> · Colorization · <b>RotNet</b></div>
+  </div>
+</div>
+
+<!-- ============ ANTI-COLLAPSE ============ -->
+<h2>Mécanismes anti-collapse</h2>
+<p class="h2sub">Le collapse — l'encodeur produit le même vecteur pour toute image — ne concerne que les méthodes joint-embedding, dont la cible est générée par le modèle lui-même.</p>
+<div class="scroll">
+<table class="tbl">
+<thead><tr><th>Mécanisme</th><th>Suffisant seul ?</th><th>Preuve / contre-preuve</th></tr></thead>
+<tbody>
+<tr><td>Négatifs</td><td class="yes">oui</td><td>SimCLR : ni predictor, ni EMA, ni stop-gradient</td></tr>
+<tr><td>Clustering + équipartition</td><td class="yes">oui</td><td>SwAV (mais codes détachés du graphe)</td></tr>
+<tr><td>Contraintes de covariance</td><td class="yes">oui</td><td>Barlow Twins, VICReg : aucun autre mécanisme</td></tr>
+<tr><td>Stop-gradient <b>+ predictor</b></td><td class="yes">oui</td><td>SimSiam — sans EMA, sans négatifs</td></tr>
+<tr><td>Stop-gradient <b>+ centering/sharpening</b></td><td class="yes">oui</td><td>DINO — voie alternative, sans predictor</td></tr>
+<tr><td>Stop-gradient seul</td><td class="no">non</td><td>SimSiam sans predictor → collapse</td></tr>
+<tr><td>EMA seul</td><td class="no">non</td><td>BYOL sans predictor → collapse malgré l'EMA</td></tr>
+</tbody>
+</table>
+</div>
+<div class="note warn" style="margin-top:.8rem"><b>Rôle du teacher EMA.</b> L'EMA est souvent présenté comme le mécanisme anti-collapse de BYOL. Les ablations de SimSiam montrent qu'il n'est pas nécessaire : c'est le couple <b>predictor + stop-gradient</b> qui empêche le collapse, l'EMA apportant performance et stabilité.</div>
+<div class="note"><b>Synthèse.</b> Trois mécanismes suffisent isolément — négatifs, contrainte de distribution (équipartition, covariance, ou centering/sharpening), asymétrie architecturale. L'EMA n'en fait pas partie : il ne suffit seul dans aucun cas, mais améliore la plupart des méthodes.</div>
+
+<!-- ============ COMPOSANTS ============ -->
+<h2>Composants récurrents</h2>
+<div class="scroll">
+<table class="tbl">
+<thead><tr><th>Composant</th><th>Rôle</th><th>Gardé après entraînement ?</th></tr></thead>
+<tbody>
+<tr><td><b>Projector</b> (g)</td><td>Absorbe l'exigence d'invariance aux augmentations, pour que l'encodeur puisse garder l'information (couleur, etc.). Présent des <em>deux</em> côtés.</td><td class="no">non — on garde les features <em>avant</em> projection</td></tr>
+<tr><td><b>Predictor</b> (q)</td><td>Brise la symétrie ; présent d'<em>un seul</em> côté. Le retirer → collapse. Propre à BYOL/SimSiam ; absent de DINO.</td><td class="no">non</td></tr>
+<tr><td><b>Centering + sharpening</b></td><td>Voie alternative au predictor : le centering empêche qu'une dimension domine, le sharpening empêche la sortie uniforme. Utilisé par DINO et sa lignée.</td><td class="no">non</td></tr>
+<tr><td><b>Teacher EMA</b></td><td>Cible lente et stable. Améliore performance et stabilité ; n'empêche pas le collapse à lui seul.</td><td class="no">non (ou distillé)</td></tr>
+<tr><td><b>Stop-gradient</b></td><td>Le gradient ne remonte jamais dans la branche cible. Transforme un problème à deux corps en poursuite.</td><td>—</td></tr>
+<tr><td><b>Multi-crop</b></td><td>Plusieurs petits crops + 2 grands. Inventé par SwAV, hérité par DINO. Gros gain à coût modéré.</td><td>—</td></tr>
+<tr><td><b>Registers</b></td><td>4 tokens sans rôle spatial qui absorbent l'information globale, évitant que des patchs soient détournés en mémoire tampon.</td><td class="yes">oui (dans l'archi)</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ============ ÉVALUATION ============ -->
+<h2>Protocoles d'évaluation</h2>
+<div class="scroll">
+<table class="tbl">
+<thead><tr><th>Protocole</th><th>Ce qu'il mesure</th><th>Qui y brille</th></tr></thead>
+<tbody>
+<tr><td><b>Linear probe</b></td><td>Séparabilité linéaire des features globales, backbone gelé</td><td>DINO, DINOv2/v3</td></tr>
+<tr><td><b>k-NN</b></td><td>Structure métrique de l'espace, sans aucun apprentissage</td><td>DINO (son test signature)</td></tr>
+<tr><td><b>Fine-tuning complet</b></td><td>Qualité de l'initialisation</td><td>MAE</td></tr>
+<tr><td><b>Dense prediction</b> (segmentation, profondeur)</td><td>Qualité des patch tokens</td><td>iBOT, DINOv2/v3 (Gram anchoring)</td></tr>
+</tbody>
+</table>
+</div>
+<div class="note"><b>Asymétrie MAE / DINO.</b> MAE domine en fine-tuning et reste moyen en linear probe ; DINO présente le profil inverse. La reconstruction pixel produit des features locales et texturales — bonne initialisation, faible séparabilité linéaire — là où la distillation produit des features globales séparables. iBOT et DINOv2 combinent les deux losses.</div>
+
+<!-- ============ TIMELINE ============ -->
+<h2>Repères chronologiques</h2>
+<div class="tl">
+  <div class="ev" style="--c:var(--pretext)"><span class="yr">2015–2018</span><div class="ttl">Pretext tasks</div><div class="d">Context prediction, Jigsaw, Colorization, RotNet — le SSL existe mais plafonne.</div></div>
+  <div class="ev" style="--c:var(--contrast)"><span class="yr">2020</span><div class="ttl">SimCLR, MoCo</div><div class="d">Le contrastif rend le SSL compétitif avec le supervisé. Fixe le vocabulaire du domaine.</div></div>
+  <div class="ev" style="--c:var(--distill)"><span class="yr">juin 2020</span><div class="ttl">BYOL</div><div class="d">Apprendre sans négatifs. Le choc conceptuel.</div></div>
+  <div class="ev" style="--c:var(--cluster)"><span class="yr">2020</span><div class="ttl">SwAV</div><div class="d">Clustering en ligne + multi-crop.</div></div>
+  <div class="ev" style="--c:var(--distill)"><span class="yr">nov. 2020</span><div class="ttl">SimSiam</div><div class="d">Ablation devenue méthode : l'EMA n'est pas nécessaire.</div></div>
+  <div class="ev" style="--c:var(--distill)"><span class="yr">2021</span><div class="ttl">DINO</div><div class="d">Self-distillation sur ViT ; cartes d'attention qui segmentent sans supervision.</div></div>
+  <div class="ev" style="--c:var(--mim)"><span class="yr">2021</span><div class="ttl">MAE, BEiT, iBOT</div><div class="d">Le masked modeling arrive en vision. iBOT fusionne MIM et distillation.</div></div>
+  <div class="ev" style="--c:var(--latent)"><span class="yr">2022–2023</span><div class="ttl">data2vec, I-JEPA</div><div class="d">La prédiction latente : prédire le sens, pas l'apparence.</div></div>
+  <div class="ev" style="--c:var(--distill)"><span class="yr">2023</span><div class="ttl">DINOv2</div><div class="d">Le passage à l'échelle industrielle — la curation des données devient le vrai différenciant.</div></div>
+  <div class="ev" style="--c:var(--latent)"><span class="yr">2024–2025</span><div class="ttl">V-JEPA, V-JEPA 2</div><div class="d">Vidéo et world models ; applications robotiques.</div></div>
+  <div class="ev" style="--c:var(--distill)"><span class="yr">2025</span><div class="ttl">DINOv3</div><div class="d">7B paramètres, 1,7B images, Gram anchoring. Backbone gelé qui bat les spécialistes en dense prediction.</div></div>
+</div>
+
+<!-- ============ PIÈGES ============ -->
+<h2>Précisions de vocabulaire</h2>
+<ul>
+  <li><b>SSL et contrastif</b> ne s'opposent pas : le contrastif est une sous-famille du SSL, au même titre que le clustering ou la distillation.</li>
+  <li><b>« Non-contrastif »</b> désigne les méthodes SSL sans exemples négatifs (BYOL, DINO, SimSiam). L'opposition est interne au SSL.</li>
+  <li><b>« Collapse »</b> recouvre deux phénomènes distincts : en SSL, un encodeur produisant le même vecteur pour toute image ; en attention (<em>entropy collapse</em>), un softmax qui sature sur un seul token.</li>
+  <li><b>« Masking »</b> désigne soit une restriction de l'attention entre tokens (masque causal), soit le retrait de contenu d'entrée qui définit la tâche d'apprentissage (MAE, JEPA).</li>
+  <li><b>CLIP</b> est contrastif mais relève de la supervision faible (<em>natural language supervision</em>) : les légendes sont d'origine humaine.</li>
+</ul>
+
+<footer>Cheat sheet SSL Vision · deux axes de lecture transverses : joint-embedding vs reconstructif, et features globales vs denses.</footer>
+
+</div>
+</body>
+</html>

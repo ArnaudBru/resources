@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fiches SSL Vision — Self-Supervised Learning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650;9..144,720&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FBFAF7;
+    --ink:#1B2230;
+    --ink-soft:#4A5468;
+    --rule:#E3E0D8;
+    --card:#FFFFFF;
+    /* accents spectraux — inspirés des visualisations PCA de patch features */
+    --a1:#5B4FD6; /* attention */
+    --a2:#2E7DB8; /* vit */
+    --a3:#0F8A6C; /* dino */
+    --a4:#C2731F; /* jepa */
+    --a5:#B84A6E; /* mae */
+    --a6:#6A7F1F; /* contrastif */
+    --a7:#7A6A55; /* historique */
+    --done:#0F8A6C;
+    font-size:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto} *{transition:none!important;animation:none!important}}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Spectral',Georgia,serif;
+    line-height:1.65;
+  }
+  a{color:inherit}
+
+  /* ---------- header ---------- */
+  header{
+    border-bottom:1px solid var(--rule);
+    padding:2.2rem 1.5rem 1.6rem;
+    max-width:1180px;margin:0 auto;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ink-soft);
+  }
+  h1{
+    font-family:'Fraunces',serif;font-weight:720;
+    font-size:clamp(1.9rem,4.5vw,3rem);
+    letter-spacing:-.015em;line-height:1.08;margin:.45rem 0 .6rem;
+  }
+  .lede{max-width:56ch;color:var(--ink-soft);font-size:1.02rem}
+
+  /* signature : patch grid */
+  .patchgrid{display:inline-grid;grid-template-columns:repeat(4,10px);gap:2px;vertical-align:middle;margin-right:.6rem}
+  .patchgrid span{width:10px;height:10px;border-radius:2px;opacity:.9}
+
+  /* ---------- progress ---------- */
+  .progress-wrap{
+    max-width:1180px;margin:0 auto;padding:1rem 1.5rem;
+    display:flex;align-items:center;gap:1rem;flex-wrap:wrap;
+    border-bottom:1px solid var(--rule);
+    position:sticky;top:0;background:var(--paper);z-index:10;
+  }
+  .progress-label{font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--ink-soft)}
+  .progress-label strong{color:var(--ink)}
+  .bar{flex:1;min-width:140px;height:6px;background:var(--rule);border-radius:3px;overflow:hidden}
+  .bar i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--a1),var(--a3),var(--a4));transition:width .35s ease}
+  .reset-btn{
+    font-family:'IBM Plex Mono',monospace;font-size:.72rem;
+    background:none;border:1px solid var(--rule);border-radius:4px;
+    padding:.3rem .7rem;cursor:pointer;color:var(--ink-soft);
+  }
+  .reset-btn:hover{border-color:var(--ink-soft)}
+  .note-mem{font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--ink-soft);flex-basis:100%}
+
+  /* ---------- layout ---------- */
+  .wrap{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:230px 1fr;gap:2.5rem;padding:1.8rem 1.5rem 4rem}
+  @media(max-width:840px){.wrap{grid-template-columns:1fr;gap:1rem}}
+
+  nav.toc{position:sticky;top:64px;align-self:start;font-size:.88rem}
+  @media(max-width:840px){nav.toc{position:static;display:flex;gap:.5rem;overflow-x:auto;padding-bottom:.5rem}}
+  nav.toc a{
+    display:flex;align-items:center;gap:.55rem;
+    text-decoration:none;color:var(--ink-soft);
+    padding:.42rem .5rem;border-radius:6px;white-space:nowrap;
+  }
+  nav.toc a:hover{background:var(--card);color:var(--ink)}
+  nav.toc .dot{width:9px;height:9px;border-radius:2px;flex:none}
+  nav.toc .qcount{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:.68rem}
+  @media(max-width:840px){nav.toc .qcount{margin-left:.3rem}}
+
+  /* ---------- fiche ---------- */
+  section.fiche{
+    background:var(--card);
+    border:1px solid var(--rule);
+    border-radius:10px;
+    padding:2rem 2.1rem 1.6rem;
+    margin-bottom:2rem;
+    border-top:4px solid var(--fc,var(--a1));
+    scroll-margin-top:80px;
+  }
+  @media(max-width:840px){section.fiche{padding:1.4rem 1.1rem 1.1rem}}
+  .fiche-tag{
+    font-family:'IBM Plex Mono',monospace;font-size:.7rem;
+    letter-spacing:.12em;text-transform:uppercase;color:var(--fc,var(--a1));
+    display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem;
+  }
+  .fiche h2{
+    font-family:'Fraunces',serif;font-weight:650;
+    font-size:clamp(1.35rem,2.6vw,1.8rem);letter-spacing:-.01em;line-height:1.15;
+    margin-bottom:1rem;
+  }
+  .idee{
+    border-left:3px solid var(--fc,var(--a1));
+    padding:.15rem 0 .15rem 1rem;margin:0 0 1.4rem;
+    font-size:1.06rem;font-style:italic;color:var(--ink);
+  }
+  .idee b{font-style:normal;font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;display:block;color:var(--ink-soft);margin-bottom:.25rem;font-weight:500}
+  .fiche h3{
+    font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.78rem;
+    letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);
+    margin:1.6rem 0 .7rem;padding-top:1.2rem;border-top:1px dashed var(--rule);
+  }
+  .fiche p{margin-bottom: .85rem}
+  .fiche ul{list-style:none;margin-bottom:.9rem}
+  .fiche ul li{padding-left:1.15rem;position:relative;margin-bottom:.55rem}
+  .fiche ul li::before{
+    content:"";position:absolute;left:0;top:.62em;width:7px;height:7px;border-radius:2px;
+    background:var(--fc,var(--a1));opacity:.55;
+  }
+  /* --- items cochables (mécanismes, dérivés, généalogie) --- */
+  .fiche ul.checkable li{
+    padding-left:1.9rem;cursor:pointer;border-radius:6px;
+    margin-left:-.4rem;padding-right:.4rem;transition:background .15s;
+  }
+  .fiche ul.checkable li:hover{background:var(--paper)}
+  .fiche ul.checkable li:focus-visible{outline:2px solid var(--fc,var(--a1));outline-offset:2px}
+  .fiche ul.checkable li::before{
+    left:.15rem;top:.5em;width:15px;height:15px;border-radius:3px;
+    background:transparent;opacity:1;
+    border:2px solid color-mix(in srgb, var(--fc,var(--a1)) 45%, transparent);
+    transition:all .15s;
+  }
+  .fiche ul.checkable li.done{color:var(--ink-soft)}
+  .fiche ul.checkable li.done::before{
+    background:var(--fc,var(--a1));border-color:var(--fc,var(--a1));
+  }
+  .fiche ul.checkable li.done::after{
+    content:"";position:absolute;left:.5rem;top:.62em;width:4px;height:8px;
+    border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg);
+  }
+  .sec-head{display:flex;align-items:baseline;gap:.6rem;flex-wrap:wrap}
+  .sec-count{font-family:'IBM Plex Mono',monospace;font-size:.68rem;letter-spacing:.04em;text-transform:none;opacity:.8}
+
+  .fiche strong{font-weight:600}
+  .fiche em{font-style:italic}
+  code{font-family:'IBM Plex Mono',monospace;font-size:.86em;background:var(--paper);border:1px solid var(--rule);border-radius:4px;padding:.05em .35em}
+
+  /* pièges */
+  .piege{
+    background:color-mix(in srgb, var(--fc,var(--a1)) 5%, var(--card));
+    border:1px solid color-mix(in srgb, var(--fc,var(--a1)) 22%, var(--rule));
+    border-radius:8px;padding: .9rem 1.1rem;margin-bottom:.9rem;font-size:.95rem;
+  }
+
+  /* ---------- questions ---------- */
+  .q-list{margin-top:.4rem}
+  .q{
+    display:flex;gap:.8rem;align-items:flex-start;
+    padding:.7rem .8rem;border-radius:8px;cursor:pointer;
+    border:1px solid transparent;transition:background .15s;
+    user-select:none;
+  }
+  .q:hover{background:var(--paper)}
+  .q:focus-visible{outline:2px solid var(--fc,var(--a1));outline-offset:2px}
+  .q .num{
+    font-family:'IBM Plex Mono',monospace;font-size:.72rem;font-weight:600;
+    color:var(--fc,var(--a1));flex:none;padding-top:.22rem;min-width:2.1rem;
+  }
+  .q .box{
+    flex:none;width:18px;height:18px;margin-top:.28rem;
+    border:2px solid var(--ink-soft);border-radius:4px;position:relative;transition:all .15s;
+  }
+  .q.done .box{background:var(--done);border-color:var(--done)}
+  .q.done .box::after{
+    content:"";position:absolute;left:4px;top:1px;width:5px;height:9px;
+    border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg);
+  }
+  .q .txt{flex:1}
+  .q.done .txt{color:var(--ink-soft)}
+  .q-hint{font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--ink-soft);margin:.2rem 0 .6rem}
+
+  /* ---------- recap ---------- */
+  .recap{
+    border:1px solid var(--rule);border-radius:10px;background:var(--card);
+    padding:1.8rem 2rem;margin-bottom:3rem;
+  }
+  .recap h2{font-family:'Fraunces',serif;font-weight:650;font-size:1.5rem;margin-bottom:.8rem}
+  .recap-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.7rem;margin:1rem 0}
+  .recap-cell{
+    border:1px solid var(--rule);border-radius:8px;padding:.7rem .8rem;
+    font-size:.85rem;border-left:4px solid var(--cc);
+  }
+  .recap-cell b{display:block;font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.15rem}
+  footer{max-width:1180px;margin:0 auto;padding:0 1.5rem 3rem;color:var(--ink-soft);font-size:.85rem}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Self-supervised learning · vision · 2026</div>
+  <h1>
+    <span class="patchgrid" aria-hidden="true">
+      <span style="background:#5B4FD6"></span><span style="background:#2E7DB8"></span><span style="background:#0F8A6C"></span><span style="background:#C2731F"></span>
+      <span style="background:#2E7DB8"></span><span style="background:#0F8A6C"></span><span style="background:#C2731F"></span><span style="background:#B84A6E"></span>
+      <span style="background:#0F8A6C"></span><span style="background:#C2731F"></span><span style="background:#B84A6E"></span><span style="background:#6A7F1F"></span>
+      <span style="background:#C2731F"></span><span style="background:#B84A6E"></span><span style="background:#6A7F1F"></span><span style="background:#7A6A55"></span>
+    </span>Fiches de compréhension
+  </h1>
+  <p class="lede">Sept fiches, un format : l'idée en une phrase, les mécanismes, la généalogie, les pièges — et les questions d'expertise. Une fiche est maîtrisée quand tu sais répondre à ses questions par écrit, sans la relire.</p>
+</header>
+
+<div class="progress-wrap">
+  <span class="progress-label"><strong id="pc">0</strong> / <span id="ptot">23</span> questions</span>
+  <div class="bar" role="progressbar" aria-label="Progression questions"><i id="pbar"></i></div>
+  <span class="progress-label"><strong id="mc">0</strong> / <span id="mtot">0</span> mécanismes</span>
+  <div class="bar" role="progressbar" aria-label="Progression mécanismes"><i id="mbar" style="background:linear-gradient(90deg,var(--a5),var(--a6))"></i></div>
+  <button class="reset-btn" id="reset">Réinitialiser</button>
+  <span class="note-mem" id="memnote"></span>
+</div>
+
+<div class="wrap">
+
+<nav class="toc" aria-label="Fiches">
+  <a href="#f1"><span class="dot" style="background:var(--a1)"></span>Attention<span class="qcount" data-f="f1"></span></a>
+  <a href="#f2"><span class="dot" style="background:var(--a2)"></span>Vision Transformers<span class="qcount" data-f="f2"></span></a>
+  <a href="#f3"><span class="dot" style="background:var(--a3)"></span>Lignée DINO<span class="qcount" data-f="f3"></span></a>
+  <a href="#f4"><span class="dot" style="background:var(--a4)"></span>Lignée JEPA<span class="qcount" data-f="f4"></span></a>
+  <a href="#f5"><span class="dot" style="background:var(--a5)"></span>MAE / iBOT<span class="qcount" data-f="f5"></span></a>
+  <a href="#f6"><span class="dot" style="background:var(--a6)"></span>Contrastif<span class="qcount" data-f="f6"></span></a>
+  <a href="#f7"><span class="dot" style="background:var(--a7)"></span>Bases historiques<span class="qcount" data-f="f7"></span></a>
+</nav>
+
+<main>
+
+<!-- ============ FICHE 1 ============ -->
+<section class="fiche" id="f1" style="--fc:var(--a1)">
+  <div class="fiche-tag">Fiche 1 · Fondations</div>
+  <h2>Le mécanisme d'attention et ses dérivés</h2>
+  <div class="idee"><b>L'idée en une phrase</b>Chaque élément d'une séquence calcule une moyenne pondérée de tous les autres, où les poids sont appris dynamiquement en fonction du contenu — contrairement à une convolution dont les poids sont fixes après entraînement.</div>
+
+  <h3>Mécanismes à comprendre</h3>
+  <ul>
+    <li><strong>Q, K, V</strong> : chaque token produit une <em>query</em> (« qu'est-ce que je cherche ? »), une <em>key</em> (« qu'est-ce que je propose ? ») et une <em>value</em> (« qu'est-ce que je transmets ? »). Score d'attention = <code>softmax(QKᵀ/√d)·V</code>.</li>
+    <li><strong>Le √d</strong> : sans cette normalisation, les produits scalaires grandissent avec la dimension, le softmax sature, les gradients disparaissent.</li>
+    <li><strong>Multi-head</strong> : plusieurs attentions en parallèle sur des sous-espaces ; chaque tête peut se spécialiser (relations locales, globales, sémantiques…).</li>
+    <li><strong>Self vs cross-attention</strong> : self = Q, K, V viennent de la même séquence ; cross = Q vient d'une séquence, K/V d'une autre (décodeurs, DETR, multimodal). Propriétés de permutation distinctes : la self-attention est <em>équivariante</em> par permutation ; la cross-attention est équivariante en Q mais <em>invariante</em> en K/V — elle traite la seconde séquence comme un ensemble non ordonné.</li>
+    <li><strong>Masked self-attention</strong> : un masque met certaines positions à −∞ <em>avant</em> le softmax, qui leur donne donc un poids nul. Cas canonique : le masque causal des décodeurs — le token t ne voit que les tokens ≤ t, ce qui permet d'entraîner toutes les positions en parallèle sans que le modèle lise la suite. Rare en vision (ViT et BERT sont non masqués), mais l'idée réapparaît dans le masking de MAE et de JEPA.</li>
+    <li><strong>Complexité O(n²)</strong> : chaque token regarde tous les autres — LE goulot d'étranglement qui motive tous les dérivés.</li>
+  </ul>
+
+  <h3>Les dérivés à connaître</h3>
+  <ul>
+    <li><strong>Attention linéaire / efficiente</strong> (Performer, Linformer) : approximations pour casser le O(n²).</li>
+    <li><strong>Windowed attention</strong> (Swin Transformer) : attention locale par fenêtres glissantes, hiérarchique — réintroduit un biais de localité.</li>
+    <li><strong>FlashAttention</strong> : pas un changement mathématique mais une réorganisation mémoire (tiling, recomputation) qui rend l'attention exacte beaucoup plus rapide. Standard partout en 2026.</li>
+    <li><strong>Registers</strong> (Darcet et al., 2023) : tokens supplémentaires sans signification spatiale qui absorbent les « artefacts » d'attention — directement utilisés dans DINOv2/v3.</li>
+  </ul>
+
+  <h3>Pièges de compréhension</h3>
+  <div class="piege">L'attention n'a <em>aucune</em> notion d'ordre : sans positional encoding, une image mélangée donne le même résultat. Comprendre pourquoi.</div>
+  <div class="piege">« Attention map » ≠ « explication » : les cartes d'attention sont suggestives mais ne constituent pas une explication causale fiable.</div>
+
+  <h3>Questions d'expertise</h3>
+  <p class="q-hint">clique pour cocher — questions comme mécanismes, dans toutes les fiches</p>
+  <div class="q-list">
+    <div class="q" tabindex="0" role="checkbox" aria-checked="false"><span class="num">Q1</span><span class="box"></span><span class="txt">Pourquoi divise-t-on par √d dans le softmax, et que se passe-t-il concrètement si on l'enlève ?</span></div>
+    <div class="q" tabindex="0" role="checkbox" aria-checked="false"><span class="num">Q2</span><span class="box"></span><span class="txt">Quelle est la différence de biais inductif entre une convolution et la self-attention, et quelle conséquence sur les besoins en données ?</span></div>
+    <div class="q" tabindex="0" role="checkbox" aria-checked="false"><span class="num">Q3</span><span class="box"></span><span class="txt">Que sont les register tokens et quel problème des ViT résolvent-ils dans DINOv2/v3 ?</span></div>
+  </div>
+</section>
+
+<!-- ============ FICHE 2 ============ -->
+<section class="fiche" id="f2" style="--fc:var(--a2)">
+  <div class="fiche-tag">Fiche 2 · Fondations</div>
+  <h2>Vision Transformers (ViT)</h2>
+  <div class="idee"><b>L'idée en une phrase</b>Traiter une image comme une séquence de mots — découper en patches de 16×16, projeter chaque patch en vecteur, et appliquer un Transformer standard sans quasiment aucune adaptation.</div>
+
+  <h3>Mécanismes à comprendre</h3>
+  <ul>
+    <li><strong>Patchify</strong> : image 224×224 → 196 patches de 16×16 → 196 tokens de dimension d. Simple projection linéaire (ou conv de stride 16, équivalent).</li>
+    <li><strong>CLS token</strong> : un token appris qui agrège l'information globale — utilisé pour la classification. Les <em>patch tokens</em> portent l'information locale/dense.</li>
+    <li><strong>Positional embeddings</strong> : appris ou sinusoïdaux, ils réinjectent la géométrie perdue. Leur interpolation permet de changer de résolution après entraînement.</li>
+    <li><strong>Pas de biais inductif spatial</strong> : contrairement aux CNN (localité, invariance par translation), le ViT doit tout apprendre des données. Conséquence : ViT &lt; CNN sur peu de données, ViT &gt; CNN à grande échelle.</li>
+    <li><strong>Variantes</strong> : ViT-S/B/L/H (+ ViT-g, ViT-7B chez DINOv3). Le « /16 » ou « /14 » indique la taille des patches — patches plus petits = features plus denses = plus coûteux.</li>
+  </ul>
+
+  <h3>Pourquoi c'est central pour le SSL</h3>
+  <p>Le ViT est le backbone de tout le SSL moderne. La séparation <strong>CLS token (global) / patch tokens (dense)</strong> structure toutes les évaluations : classification via CLS, segmentation et profondeur via patchs.</p>
+
+  <h3>Pièges de compréhension</h3>
+  <div class="piege">Un ViT n'est pas « meilleur » qu'un CNN dans l'absolu : il est meilleur <em>à grande échelle de données</em> — exactement le régime du SSL.</div>
+  <div class="piege">Le CLS token n'a rien de magique : certaines méthodes utilisent le mean pooling des patch tokens à la place, avec des résultats similaires.</div>
+
+  <h3>Questions d'expertise</h3>
+  <div class="q-list">
+    <div class="q" tabindex="0" role="checkbox" aria-checked="false"><span class="num">Q4</span><span class="box"></span><span class="txt">Features globales (CLS) vs denses (patch tokens) : quelle différence, et quelles tâches utilisent lesquelles ?</span></div>
+    <div class="q" tabindex="0" role="checkbox" aria-checked="false"><span class="num">Q5</span><span class="box"></span><span class="txt">Pourquoi les ViT ont-ils besoin de plus de données que les CNN, et pourquoi est-ce paradoxalement un avantage en SSL ?</span></div>
+    <div class="q" tabindex="0" role="checkbox" aria-checked="false"><span class="num">Q6</span><span class="box"></span><span class="txt">Que se passe-t-il quand on passe un ViT entraîné en 224×224 sur une image en 518×518 ? Quel mécanisme le permet ?</span></div>
+  </div>
+</section>
+
+<!-- ============ FICHE 3 ============ -->
+<section class="fiche" id="f3" style="--fc:var(--a3)">
+  <div class="fiche-tag">Fiche 3 · Cœur du SOTA</div>
+  <h2>La lignée DINO (self-distillation)</h2>
+  <div class="idee"><b>L'idée en une phrase</b>Un réseau <em>student</em> apprend à prédire les sorties d'un réseau <em>teacher</em> qui est une copie retardée de lui-même (moyenne mobile exponentielle de ses poids), sur des vues différentes de la même image — pas de labels, pas de négatifs.</div>
+
+  <h3>La généalogie</h3>
+  <ul>
+    <li><strong>BYOL (2020)</strong> : le choc conceptuel — apprendre sans négatifs sans collapse, grâce au trio predictor + EMA teacher + stop-gradient.</li>
+    <li><strong>SimSiam (2021)</strong> : la version minimaliste — montre que le couple <strong>stop-gradient + predictor</strong> est l'ingrédient essentiel, et que l'EMA est optionnel. Retirer le predictor fait collapser le modèle même avec l'EMA ; le retirer <em>lui</em> ne casse rien.</li>
+    <li><strong>DINO (2021)</strong> : self-distillation avec softmax de sortie ; anti-collapse par <strong>centering</strong> (soustraire la moyenne des sorties du teacher, empêche la domination d'une dimension) + <strong>sharpening</strong> (température basse côté teacher, empêche la sortie uniforme). Découverte majeure : des cartes d'attention qui segmentent les objets sans supervision.</li>
+    <li><strong>DINOv2 (2023)</strong> : passage à l'échelle industrielle — curation automatique du dataset LVD-142M (le vrai différenciant), loss combinée DINO (global) + iBOT (dense), régularisateur KoLeo, distillation des gros modèles vers les petits.</li>
+    <li><strong>DINOv3 (2025)</strong> : scaling à 7B de paramètres et 1,7B d'images ; <strong>Gram anchoring</strong> — régularisation qui contraint la matrice de Gram des patch features à rester proche de celle d'un teacher antérieur, résolvant la dégradation des features denses sur les longs entraînements ; premier backbone frozen qui bat des modèles spécialisés en dense prediction.</li>
+  </ul>
+
+  <h3>Mécanismes anti-collapse — le cœur de la fiche</h3>
+  <p>Le collapse = le réseau sort la même chose pour toute image (solution triviale de « prédire soi-même »). Quatre familles de parades : <strong>les négatifs</strong> (contrastif), <strong>l'asymétrie architecturale</strong> (predictor + stop-gradient — BYOL/SimSiam ; l'EMA améliore mais n'est pas nécessaire), <strong>la manipulation statistique des sorties</strong> (centering + sharpening — DINO), <strong>les contraintes de covariance</strong> (Barlow Twins / VICReg).</p>
+
+  <h3>Pièges de compréhension</h3>
+  <div class="piege">Le teacher EMA n'est <em>pas</em> entraîné par gradient : il est une moyenne mobile du student. C'est le student qui court après une cible qui se stabilise.</div>
+  <div class="piege">Le succès de DINOv2/v3 doit plus à la <em>curation des données</em> qu'à l'innovation algorithmique — contre-intuitif mais central.</div>
+
+  <h3>Questions d'expertise</h3>
+  <div class="q-list">
+    <div class="q" tabindex="0" role="checkbox" aria-checked="false"><span class="num">Q7</span><span class="box"></span><span class="txt">Pourquoi BYOL/DINO ne collapsent-ils pas sans négatifs ? Sois précis sur le rôle de chaque mécanisme (EMA, stop-gradient, centering, sharpening).</span></div>
+    <div class="q" tabindex="0" role="checkbox" aria-checked="false"><span class="num">Q8</span><span class="box"></span><span class="txt">Quel est le vrai facteur différenciant de DINOv2/v3 par rapport aux méthodes académiques ?</span></div>
+    <div class="q" tabindex="0" role="checkbox" aria-checked="false"><span class="num">Q9</span><span class="box"></span><span class="txt">Que résout le Gram anchoring de DINOv3, et pourquoi les features denses se dégradaient-elles avant ?</span></div>
+    <div class="q" tabindex="0" role="checkbox" aria-checked="false"><span class="num">Q10</span><span class="box"></span><span class="txt">Pourquoi un backbone frozen DINOv3 bat-il des modèles fine-tunés spécialisés ?</span></div>
+  </div>
+</section>
+
+<!-- ============ FICHE 4 ============ -->
+<section class="fiche" id="f4" style="--fc:var(--a4)">
+  <div class="fiche-tag">Fiche 4 · Cœur du SOTA</div>
+  <h2>La lignée JEPA (prédiction latente)</h2>
+  <div class="idee"><b>L'idée en une phrase</b>Au lieu de reconstruire les pixels manquants (MAE) ou de comparer des vues (contrastif), prédire la <em>représentation latente</em> des parties masquées — on prédit le sens, pas l'apparence.</div>
+
+  <h3>La généalogie</h3>
+  <ul>
+    <li><strong>data2vec (2022)</strong> : le précurseur — prédire les représentations d'un teacher EMA sur les parties masquées, unifié pour vision/audio/texte.</li>
+    <li><strong>I-JEPA (2023)</strong> : l'architecture canonique — un context encoder voit une partie de l'image, un predictor prédit les représentations (produites par un target encoder EMA) de blocs cibles, conditionné par leur position. Pas d'augmentations artisanales, pas de reconstruction pixel.</li>
+    <li><strong>V-JEPA (2024)</strong> : extension vidéo — prédire les représentations latentes de tubes spatio-temporels masqués. Apprend le mouvement et la dynamique.</li>
+    <li><strong>V-JEPA 2 (2025)</strong> : scaling massif + volet « world model » — le modèle prédit les conséquences d'actions, utilisé pour la planification robotique zero-shot.</li>
+  </ul>
+
+  <h3>Pourquoi prédire en latent plutôt qu'en pixels</h3>
+  <p>Les pixels contiennent une énorme part d'information imprévisible et sans intérêt sémantique (texture exacte de l'herbe, bruit). Un modèle qui reconstruit les pixels dépense sa capacité sur ces détails. En prédisant en latent, le modèle peut <strong>ignorer l'imprévisible</strong> et se concentrer sur ce qui est structurellement prédictible — la sémantique. C'est l'argument central de LeCun contre les modèles génératifs pour la perception.</p>
+  <p><strong>Le cadre conceptuel</strong> : JEPA s'inscrit dans la vision « world models » de LeCun (<em>A Path Towards Autonomous Machine Intelligence</em>, 2022) — une IA qui apprend un modèle prédictif du monde par observation, comme un enfant.</p>
+
+  <h3>Pièges de compréhension</h3>
+  <div class="piege">JEPA n'est pas génératif : le predictor prédit des vecteurs, il ne peut pas générer d'image. C'est un choix, pas une limitation.</div>
+  <div class="piege">Le target encoder EMA joue le même rôle anti-collapse que dans BYOL — la lignée JEPA hérite directement de la self-distillation.</div>
+
+  <h3>Questions d'expertise</h3>
+  <div class="q-list">
+    <div class="q" tabindex="0" role="checkbox" aria-checked="false"><span class="num">Q11</span><span class="box"></span><span class="txt">Pourquoi prédire dans l'espace latent plutôt qu'en pixels ? Quel problème fondamental des pixels cela évite-t-il ?</span></div>
+    <div class="q" tabindex="0" role="checkbox" aria-checked="false"><span class="num">Q12</span><span class="box"></span><span class="txt">En quoi V-JEPA 2 est-il un « world model », et pourquoi ça intéresse la robotique ?</span></div>
+    <div class="q" tabindex="0" role="checkbox" aria-checked="false"><span class="num">Q13</span><span class="box"></span><span class="txt">Qu'est-ce qui empêche I-JEPA de collapser vers des représentations constantes ?</span></div>
+  </div>
+</section>
+
+<!-- ============ FICHE 5 ============ -->
+<section class="fiche" id="f5" style="--fc:var(--a5)">
+  <div class="fiche-tag">Fiche 5 · Cœur du SOTA</div>
+  <h2>La lignée MAE / iBOT (masked image modeling)</h2>
+  <div class="idee"><b>L'idée en une phrase</b>Le BERT des images — masquer une grande partie des patches et entraîner le modèle à reconstruire ce qui manque.</div>
+
+  <h3>La généalogie</h3>
+  <ul>
+    <li><strong>BEiT (2021)</strong> : première transposition sérieuse de BERT — prédit des tokens visuels <em>discrets</em> produits par un tokenizer (dVAE) pré-entraîné.</li>
+    <li><strong>MAE (2021)</strong> : la version élégante — masquer 75 % des patches, encoder <em>uniquement</em> les patches visibles (gain de compute massif), reconstruire les pixels avec un décodeur léger jeté après entraînement.</li>
+    <li><strong>iBOT (2021)</strong> : la fusion — masked modeling où la cible n'est ni les pixels ni des tokens discrets, mais la sortie d'un teacher EMA (comme DINO) sur les patches masqués. Du « MIM en latent », chaînon direct vers DINOv2.</li>
+    <li><strong>VideoMAE / v2 (2022-2023)</strong> : extension vidéo avec masking très agressif (90 %+), possible car la vidéo est très redondante temporellement.</li>
+  </ul>
+
+  <h3>Le débat central — MIM vs distillation</h3>
+  <ul>
+    <li>MAE apprend d'excellentes features pour le <strong>fine-tuning</strong> mais médiocres en <strong>linear probe</strong> : la reconstruction pixel force des features locales, texturales, peu linéairement séparables — mais qui constituent une excellente initialisation.</li>
+    <li>DINO, à l'inverse, apprend des features globales très séparables (excellent linear probe / k-NN) mais son avantage fond en fine-tuning complet.</li>
+    <li>iBOT / DINOv2 combinent les deux losses précisément pour avoir le meilleur des deux mondes : global (DINO) + dense (iBOT).</li>
+  </ul>
+
+  <h3>Pièges de compréhension</h3>
+  <div class="piege">Le ratio de masking élevé (75 %) n'est pas un détail : avec 15 % comme BERT, la tâche est trop facile en vision (l'interpolation locale suffit). Il faut masquer beaucoup pour forcer la compréhension sémantique.</div>
+  <div class="piege">Le décodeur de MAE est jeté : seul l'encodeur sert en aval. L'asymétrie encodeur lourd / décodeur léger est un choix d'efficacité.</div>
+
+  <h3>Questions d'expertise</h3>
+  <div class="q-list">
+    <div class="q" tabindex="0" role="checkbox" aria-checked="false"><span class="num">Q14</span><span class="box"></span><span class="txt">Pourquoi MAE excelle en fine-tuning mais est moyen en linear probe, et inversement pour DINO ? Qu'est-ce que ça dit de la nature des features ?</span></div>
+    <div class="q" tabindex="0" role="checkbox" aria-checked="false"><span class="num">Q15</span><span class="box"></span><span class="txt">Comment iBOT fusionne MIM et self-distillation, et pourquoi cette fusion est au cœur de DINOv2 ?</span></div>
+    <div class="q" tabindex="0" role="checkbox" aria-checked="false"><span class="num">Q16</span><span class="box"></span><span class="txt">Pourquoi masque-t-on 75 % en vision alors que BERT masque 15 % en texte ?</span></div>
+  </div>
+</section>
+
+<!-- ============ FICHE 6 ============ -->
+<section class="fiche" id="f6" style="--fc:var(--a6)">
+  <div class="fiche-tag">Fiche 6 · Mécanismes</div>
+  <h2>Le contrastif</h2>
+  <div class="idee"><b>L'idée en une phrase</b>Rapprocher dans l'espace des représentations deux vues augmentées de la même image (paire positive) et éloigner toutes les autres images (négatifs).</div>
+
+  <h3>Mécanismes à comprendre</h3>
+  <ul>
+    <li><strong>InfoNCE / NT-Xent</strong> : cross-entropy où la « bonne classe » est le positif parmi N candidats. La <strong>température</strong> contrôle la dureté : basse = focalise sur les négatifs difficiles ; trop basse = instabilité.</li>
+    <li><strong>SimCLR (2020)</strong> : la recette de référence — grosses batches (les négatifs viennent du batch), composition d'augmentations critique (crop + color jitter surtout), projection head (les features <em>avant</em> la projection sont meilleures en aval — subtil et important).</li>
+    <li><strong>MoCo v1/v2/v3</strong> : découpler le nombre de négatifs de la taille du batch via une queue mémoire + un momentum encoder (l'EMA qui survivra dans BYOL/DINO). MoCo v3 : la transposition sur ViT.</li>
+    <li><strong>CLIP (2021)</strong> : contrastif <em>cross-modal</em> image-texte. Pas du SSL pur (les textes sont une supervision faible), mais le concurrent de référence de DINOv3 en production.</li>
+  </ul>
+
+  <h3>La théorie — alignment &amp; uniformity (Wang &amp; Isola, 2020)</h3>
+  <p>La loss contrastive optimise deux choses décomposables — <strong>alignment</strong> (les positifs sont proches) et <strong>uniformity</strong> (les représentations couvrent uniformément l'hypersphère). Ce cadre éclaire toutes les méthodes : le collapse = perte d'uniformity ; les mécanismes anti-collapse de BYOL/DINO sont des manières implicites de maintenir l'uniformity sans négatifs.</p>
+  <p><strong>Pourquoi le contrastif a perdu du terrain</strong> : dépendance au batch size (il faut beaucoup de négatifs), sensibilité extrême au choix des augmentations, features globales mais denses médiocres. La self-distillation et le MIM s'en sont affranchis.</p>
+
+  <h3>Pièges de compréhension</h3>
+  <div class="piege">Les augmentations ne sont pas un détail d'implémentation : elles <em>définissent</em> les invariances apprises. Invariance à la couleur = features aveugles à la couleur — problématique pour certaines tâches (fleurs, oiseaux).</div>
+  <div class="piege">« Plus de négatifs = mieux » n'est vrai que jusqu'à un point ; les faux négatifs (deux images de la même classe traitées comme négatives) plafonnent la méthode.</div>
+
+  <h3>Questions d'expertise</h3>
+  <div class="q-list">
+    <div class="q" tabindex="0" role="checkbox" aria-checked="false"><span class="num">Q17</span><span class="box"></span><span class="txt">Pourquoi le batch size est-il critique en contrastif et pas en self-distillation ?</span></div>
+    <div class="q" tabindex="0" role="checkbox" aria-checked="false"><span class="num">Q18</span><span class="box"></span><span class="txt">Que capturent alignment et uniformity, et comment ce cadre éclaire-t-il le collapse et ses parades dans toutes les familles ?</span></div>
+    <div class="q" tabindex="0" role="checkbox" aria-checked="false"><span class="num">Q19</span><span class="box"></span><span class="txt">Pourquoi les features avant la projection head sont-elles meilleures que celles après ?</span></div>
+    <div class="q" tabindex="0" role="checkbox" aria-checked="false"><span class="num">Q20</span><span class="box"></span><span class="txt">Quand choisir DINOv3 vs CLIP/SigLIP en production ?</span></div>
+  </div>
+</section>
+
+<!-- ============ FICHE 7 ============ -->
+<section class="fiche" id="f7" style="--fc:var(--a7)">
+  <div class="fiche-tag">Fiche 7 · Culture</div>
+  <h2>Les bases historiques (pretext tasks)</h2>
+  <div class="idee"><b>L'idée en une phrase</b>Avant 2020, le SSL consistait à inventer des tâches prétextes artisanales — prédire une transformation appliquée à l'image — en espérant que les résoudre force l'apprentissage de bonnes features.</div>
+
+  <h3>Les classiques</h3>
+  <ul>
+    <li><strong>Context prediction (2015)</strong> : prédire la position relative de deux patches. Premier signal que le SSL pouvait marcher.</li>
+    <li><strong>Jigsaw (2016)</strong> : remettre 9 patches dans l'ordre.</li>
+    <li><strong>Colorization (2016)</strong> : coloriser une image en niveaux de gris.</li>
+    <li><strong>RotNet (2018)</strong> : prédire la rotation appliquée (0/90/180/270°). Le plus simple et longtemps le plus efficace.</li>
+  </ul>
+
+  <h3>Pourquoi elles ont plafonné</h3>
+  <p>Chaque tâche prétexte n'exige que les features <em>strictement nécessaires</em> à sa résolution. RotNet apprend l'orientation canonique des objets — utile, mais partiel. Jigsaw apprend des indices de continuité locale — le modèle triche avec les aberrations chromatiques des objectifs photo. Aucune ne demande une compréhension sémantique complète. Le masking et la distillation, eux, définissent des tâches <strong>ouvertes</strong> dont la difficulté croît avec les données et la capacité du modèle — elles scalent.</p>
+  <p><strong>Ce qui a survécu</strong> : l'idée que la structure de la donnée est le signal (fondation de tout le SSL), le multi-crop (SwAV → DINO), et culturellement, la prudence face aux « raccourcis » (shortcut learning) que les modèles trouvent toujours.</p>
+  <p><strong>Branches alternatives à connaître de nom</strong> : SwAV (clustering en ligne + Sinkhorn), Barlow Twins et VICReg (anti-collapse par contraintes de covariance — la 4ᵉ famille anti-collapse).</p>
+
+  <h3>Questions d'expertise</h3>
+  <div class="q-list">
+    <div class="q" tabindex="0" role="checkbox" aria-checked="false"><span class="num">Q21</span><span class="box"></span><span class="txt">Pourquoi les pretext tasks artisanales ont-elles plafonné alors que le masking et la distillation scalent ?</span></div>
+    <div class="q" tabindex="0" role="checkbox" aria-checked="false"><span class="num">Q22</span><span class="box"></span><span class="txt">Qu'est-ce que le shortcut learning, avec un exemple concret tiré de Jigsaw ?</span></div>
+    <div class="q" tabindex="0" role="checkbox" aria-checked="false"><span class="num">Q23</span><span class="box"></span><span class="txt">Comment Barlow Twins/VICReg empêchent-ils le collapse sans négatifs ni EMA ? En quoi est-ce une 4ᵉ famille distincte ?</span></div>
+  </div>
+</section>
+
+<!-- ============ RECAP ============ -->
+<div class="recap">
+  <h2>Le référentiel des 23 questions</h2>
+  <p>Ton tableau de bord global. Les questions 7 à 20 correspondent au cœur du fast-track ; 1 à 6 sont les fondations techniques ; 21 à 23 la culture historique.</p>
+  <div class="recap-grid">
+    <div class="recap-cell" style="--cc:var(--a1)"><b>Attention</b>Q1 – Q3</div>
+    <div class="recap-cell" style="--cc:var(--a2)"><b>ViT</b>Q4 – Q6</div>
+    <div class="recap-cell" style="--cc:var(--a3)"><b>DINO</b>Q7 – Q10</div>
+    <div class="recap-cell" style="--cc:var(--a4)"><b>JEPA</b>Q11 – Q13</div>
+    <div class="recap-cell" style="--cc:var(--a5)"><b>MAE / iBOT</b>Q14 – Q16</div>
+    <div class="recap-cell" style="--cc:var(--a6)"><b>Contrastif</b>Q17 – Q20</div>
+    <div class="recap-cell" style="--cc:var(--a7)"><b>Historique</b>Q21 – Q23</div>
+  </div>
+  <p><strong>Méthode de travail</strong> : après chaque module du parcours, réponds par écrit aux questions correspondantes sans regarder les fiches, puis compare. Une réponse floue = un point à recreuser.</p>
+</div>
+
+</main>
+</div>
+
+<footer>Fiches SSL Vision · deux fils rouges traversent tout : les quatre familles anti-collapse, et le clivage features globales vs denses.</footer>
+
+<script>
+(function(){
+  const KEY = 'ssl-fiches-v1';
+
+  /* IDs cochables dérivés de la POSITION dans le DOM (li/section index), pas d'un id en dur.
+     Insérer/supprimer un <li> au milieu d'une liste décale les ids des items suivants et
+     fait perdre leur progression cochée. Si besoin d'éditer une liste existante sans ce
+     risque, migrer vers des data-id explicites posés à la main. */
+
+  /* ---- 1. rendre cochables les listes de mécanismes / dérivés / généalogie ---- */
+  document.querySelectorAll('section.fiche').forEach(sec=>{
+    const uls = sec.querySelectorAll('ul');
+    uls.forEach((ul,ui)=>{
+      if(ul.classList.contains('q-list')) return;
+      ul.classList.add('checkable');
+      Array.from(ul.children).forEach((li,li_i)=>{
+        li.setAttribute('tabindex','0');
+        li.setAttribute('role','checkbox');
+        li.setAttribute('aria-checked','false');
+        li.dataset.id = sec.id+':m'+ui+'.'+li_i;
+      });
+    });
+    /* compteur par section : accroché au h3 qui précède chaque liste */
+    sec.querySelectorAll('h3').forEach(h=>{
+      let n=h.nextElementSibling, found=null;
+      while(n && n.tagName!=='H3'){ if(n.tagName==='UL'&&n.classList.contains('checkable')){found=n;break;} n=n.nextElementSibling; }
+      if(found){
+        h.classList.add('sec-head');
+        const c=document.createElement('span');
+        c.className='sec-count'; c.dataset.for=found.dataset.uid=Math.random().toString(36).slice(2);
+        h.appendChild(c);
+        found.dataset.counter=c.dataset.for;
+      }
+    });
+  });
+
+  /* identifiants stables pour les questions */
+  document.querySelectorAll('.q').forEach(q=>{
+    q.dataset.id = q.closest('section.fiche').id+':'+q.querySelector('.num').textContent.trim();
+  });
+
+  const qs   = Array.from(document.querySelectorAll('.q'));
+  const mech = Array.from(document.querySelectorAll('ul.checkable > li'));
+  const all  = qs.concat(mech);
+
+  const pc=document.getElementById('pc'), pbar=document.getElementById('pbar');
+  const mc=document.getElementById('mc'), mbar=document.getElementById('mbar');
+  document.getElementById('ptot').textContent = qs.length;
+  document.getElementById('mtot').textContent = mech.length;
+
+  /* ---- 2. persistance ---- */
+  let canStore = true;
+  function save(){
+    if(!canStore) return;
+    try{
+      const done = all.filter(e=>e.classList.contains('done')).map(e=>e.dataset.id);
+      localStorage.setItem(KEY, JSON.stringify(done));
+    }catch(e){ canStore=false; note(); }
+  }
+  function load(){
+    try{
+      const raw = localStorage.getItem(KEY);
+      if(!raw) return;
+      const set = new Set(JSON.parse(raw));
+      all.forEach(e=>{ if(set.has(e.dataset.id)){ e.classList.add('done'); e.setAttribute('aria-checked','true'); } });
+    }catch(e){ canStore=false; }
+  }
+  function note(){
+    document.getElementById('memnote').textContent = canStore
+      ? 'Progression sauvegardée dans ce navigateur — elle survit au rechargement.'
+      : 'Stockage indisponible ici : la progression sera perdue au rechargement. Ouvre le fichier .html directement pour la conserver.';
+  }
+
+  /* ---- 3. affichage ---- */
+  function ficheOf(e){ return e.closest('section.fiche').id; }
+
+  function refresh(){
+    const dq = qs.filter(e=>e.classList.contains('done')).length;
+    pc.textContent = dq; pbar.style.width = (qs.length? dq/qs.length*100:0)+'%';
+    const dm = mech.filter(e=>e.classList.contains('done')).length;
+    mc.textContent = dm; mbar.style.width = (mech.length? dm/mech.length*100:0)+'%';
+
+    document.querySelectorAll('.qcount').forEach(el=>{
+      const f=el.dataset.f;
+      const inF=all.filter(e=>ficheOf(e)===f);
+      const d=inF.filter(e=>e.classList.contains('done')).length;
+      el.textContent = d+'/'+inF.length;
+      const full = d===inF.length;
+      el.style.color = full?'var(--done)':'var(--ink-soft)';
+      el.style.fontWeight = full?'600':'400';
+    });
+
+    document.querySelectorAll('ul.checkable').forEach(ul=>{
+      const c = ul.dataset.counter && document.querySelector('.sec-count[data-for="'+ul.dataset.counter+'"]');
+      if(!c) return;
+      const items=Array.from(ul.children);
+      const d=items.filter(i=>i.classList.contains('done')).length;
+      c.textContent = d+'/'+items.length;
+      c.style.color = (d===items.length)?'var(--done)':'inherit';
+    });
+  }
+
+  function toggle(e){
+    e.classList.toggle('done');
+    e.setAttribute('aria-checked', e.classList.contains('done'));
+    refresh(); save();
+  }
+
+  all.forEach(e=>{
+    e.addEventListener('click', ev=>{ if(ev.target.tagName==='A') return; toggle(e); });
+    e.addEventListener('keydown', ev=>{
+      if(ev.key===' '||ev.key==='Enter'){ ev.preventDefault(); toggle(e); }
+    });
+  });
+
+  document.getElementById('reset').addEventListener('click', ()=>{
+    if(!confirm('Tout décocher ? (questions + mécanismes)')) return;
+    all.forEach(e=>{ e.classList.remove('done'); e.setAttribute('aria-checked','false'); });
+    refresh(); save();
+  });
+
+  load(); note(); refresh();
+})();
+</script>
+</body>
+</html>
