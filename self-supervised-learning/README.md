@@ -3,11 +3,15 @@
 Parcours + fiches de référence sur le SSL en vision (DINOv3, JEPA, MAE/iBOT, contrastif...),
 construits progressivement sur plusieurs sessions.
 
+> **📋 [Cheatsheet — référence rapide](https://arnaudbru.github.io/resources/self-supervised-learning/cheatsheet.html)**
+> Taxonomie des 7 familles SSL, tableau des mécanismes anti-collapse, composants récurrents,
+> protocoles d'éval, timeline. Garde-la ouverte à côté pendant la lecture du curriculum.
+
 ## Contents
 
 | Page | Rendered | What it is |
 |---|---|---|
-| Fiches de compréhension | [open](https://arnaudbru.github.io/resources/self-supervised-learning/) | 7 fiches interactives (attention, ViT, lignée DINO, lignée JEPA, MAE/iBOT, contrastif, bases historiques), avec cases à cocher sur 23 questions d'expertise + 38 items de mécanismes/dérivés/généalogie, progression persistée via `localStorage`. Aussi disponible en [texte brut](fiches.md). |
+| Fiches de compréhension | [open](https://arnaudbru.github.io/resources/self-supervised-learning/) | 7 fiches interactives (attention, ViT, lignée DINO, lignée JEPA, MAE/iBOT, contrastif, bases historiques), avec cases à cocher sur 23 questions d'expertise + 38 items de mécanismes/dérivés/généalogie, progression persistée via `localStorage`. |
 | Cheatsheet | [open](https://arnaudbru.github.io/resources/self-supervised-learning/cheatsheet.html) | Page de référence rapide : taxonomie des 7 familles SSL, tableau des mécanismes anti-collapse, composants récurrents, protocoles d'éval, timeline. Page de consultation, pas de suivi de progression. |
 
 ## How to read these
