@@ -17,4 +17,4 @@ Hosted version (HTML one-pagers render directly): **https://arnaudbru.github.io/
 - Self-supervised learning (vision)
   - [Fiches de compréhension](https://arnaudbru.github.io/resources/self-supervised-learning/) — 7 interactive fiches (attention, ViT, DINO, JEPA, MAE/iBOT, contrastive, history) with checkboxes for 23 expertise questions, progress saved locally
   - [Cheatsheet](https://arnaudbru.github.io/resources/self-supervised-learning/cheatsheet.html) — SSL taxonomy, anti-collapse mechanisms table, recurring components, eval protocols, timeline
-  - [Fast-track curriculum](self-supervised-learning/README.md)
+  - [Folder overview / curriculum](self-supervised-learning/README.md)
