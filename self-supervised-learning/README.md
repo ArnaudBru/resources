@@ -7,8 +7,8 @@ construits progressivement sur plusieurs sessions.
 
 | Page | Rendered | What it is |
 |---|---|---|
-| Fiches de compréhension | [open](https://arnaudbru.github.io/resources/ssl/) | 7 fiches interactives (attention, ViT, lignée DINO, lignée JEPA, MAE/iBOT, contrastif, bases historiques), avec cases à cocher sur 23 questions d'expertise + 38 items de mécanismes/dérivés/généalogie, progression persistée via `localStorage`. Aussi disponible en [texte brut](fiches.md). |
-| Cheatsheet | [open](https://arnaudbru.github.io/resources/ssl/cheatsheet.html) | Page de référence rapide : taxonomie des 7 familles SSL, tableau des mécanismes anti-collapse, composants récurrents, protocoles d'éval, timeline. Page de consultation, pas de suivi de progression. |
+| Fiches de compréhension | [open](https://arnaudbru.github.io/resources/self-supervised-learning/) | 7 fiches interactives (attention, ViT, lignée DINO, lignée JEPA, MAE/iBOT, contrastif, bases historiques), avec cases à cocher sur 23 questions d'expertise + 38 items de mécanismes/dérivés/généalogie, progression persistée via `localStorage`. Aussi disponible en [texte brut](fiches.md). |
+| Cheatsheet | [open](https://arnaudbru.github.io/resources/self-supervised-learning/cheatsheet.html) | Page de référence rapide : taxonomie des 7 familles SSL, tableau des mécanismes anti-collapse, composants récurrents, protocoles d'éval, timeline. Page de consultation, pas de suivi de progression. |
 
 ## How to read these
 
