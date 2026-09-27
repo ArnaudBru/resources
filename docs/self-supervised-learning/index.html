@@ -322,7 +322,7 @@
   <h3>La généalogie</h3>
   <ul>
     <li><strong>BYOL (2020)</strong> : le choc conceptuel — apprendre sans négatifs sans collapse, grâce au trio predictor + EMA teacher + stop-gradient.</li>
-    <li><strong>SimSiam (2021)</strong> : la version minimaliste — montre que le couple <strong>stop-gradient + predictor</strong> est l'ingrédient essentiel, et que l'EMA est optionnel. Retirer le predictor fait collapser le modèle même avec l'EMA ; le retirer <em>lui</em> ne casse rien.</li>
+    <li><strong>SimSiam (2021)</strong> : la version minimaliste — montre que le couple <strong>stop-gradient + asymétrie</strong> (ici, un predictor sur une seule branche) est l'ingrédient essentiel, et que l'EMA est optionnel. Retirer le predictor fait collapser le modèle même avec l'EMA ; le retirer <em>lui</em> ne casse rien.</li>
     <li><strong>DINO (2021)</strong> : self-distillation avec softmax de sortie ; anti-collapse par <strong>centering</strong> (soustraire la moyenne des sorties du teacher, empêche la domination d'une dimension) + <strong>sharpening</strong> (température basse côté teacher, empêche la sortie uniforme). Découverte majeure : des cartes d'attention qui segmentent les objets sans supervision.</li>
     <li><strong>DINOv2 (2023)</strong> : passage à l'échelle industrielle — curation automatique du dataset LVD-142M (le vrai différenciant), loss combinée DINO (global) + iBOT (dense), régularisateur KoLeo, distillation des gros modèles vers les petits.</li>
     <li><strong>DINOv3 (2025)</strong> : scaling à 7B de paramètres et 1,7B d'images ; <strong>Gram anchoring</strong> — régularisation qui contraint la matrice de Gram des patch features à rester proche de celle d'un teacher antérieur, résolvant la dégradation des features denses sur les longs entraînements ; premier backbone frozen qui bat des modèles spécialisés en dense prediction.</li>
@@ -330,6 +330,7 @@
 
   <h3>Mécanismes anti-collapse — le cœur de la fiche</h3>
   <p>Le collapse = le réseau sort la même chose pour toute image (solution triviale de « prédire soi-même »). Quatre familles de parades : <strong>les négatifs</strong> (contrastif), <strong>l'asymétrie architecturale</strong> (predictor + stop-gradient — BYOL/SimSiam ; l'EMA améliore mais n'est pas nécessaire), <strong>la manipulation statistique des sorties</strong> (centering + sharpening — DINO), <strong>les contraintes de covariance</strong> (Barlow Twins / VICReg).</p>
+  <p>Les deux premières parades sont en fait une seule et même idée sous deux habits : le principe commun à BYOL/SimSiam/DINO est <strong>stop-gradient + asymétrie</strong> entre les deux branches. L'asymétrie peut être <em>architecturale</em> (un predictor présent sur une seule branche) ou <em>statistique</em> (centering + sharpening appliqués aux seules sorties du teacher) — le stop-gradient seul, sans l'une des deux formes d'asymétrie, ne suffit pas.</p>
 
   <h3>Pièges de compréhension</h3>
   <div class="piege">Le teacher EMA n'est <em>pas</em> entraîné par gradient : il est une moyenne mobile du student. C'est le student qui court après une cible qui se stabilise.</div>
